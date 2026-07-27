@@ -2594,6 +2594,14 @@ const App = {
         const db = Storage.load();
         const body = `
             <div class="settings-section">
+                <div class="settings-section-title">宝宝头像</div>
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+                    <div id="settingsAvatarPreview" style="width:60px;height:60px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:30px;overflow:hidden;border:2px solid #eee">${db.baby.avatar && db.baby.avatar.startsWith('data:image/') ? `<img src="${db.baby.avatar}" style="width:100%;height:100%;object-fit:cover">` : (db.baby.avatar || '👶')}</div>
+                    <button type="button" class="btn btn-outline" id="settingsAvatarUpload" style="padding:8px 16px;font-size:13px">📷 选择照片</button>
+                    <input type="file" id="settingsAvatarInput" accept="image/*" style="display:none">
+                </div>
+            </div>
+            <div class="settings-section">
                 <div class="settings-section-title">作息目标</div>
                 <div class="form-group">
                     <label class="form-label">每日故事时间</label>
@@ -2622,12 +2630,43 @@ const App = {
         `;
 
         this.showModal('设置', body, () => {
+            // 检查是否有新上传的头像
+            if (window._avatarDataUrl) {
+                const db = Storage.load();
+                db.baby.avatar = window._avatarDataUrl;
+                Storage.save(db);
+                this.renderBabyInfo();
+                window._avatarDataUrl = null;
+            }
             const storyTime = document.getElementById('storyTimeInput').value;
             const outdoorGoal = parseInt(document.getElementById('outdoorGoalInput').value) || 120;
             const sleepGoal = parseFloat(document.getElementById('sleepGoalInput').value) || 14;
             Storage.updateSettings({ storyTime, outdoorGoal, sleepGoal });
             this.toast('设置已保存');
         });
+
+        // 设置弹窗里的头像上传
+        setTimeout(() => {
+            const settingsUpload = document.getElementById('settingsAvatarUpload');
+            const settingsInput = document.getElementById('settingsAvatarInput');
+            const settingsPreview = document.getElementById('settingsAvatarPreview');
+            if (settingsUpload && settingsInput) {
+                settingsUpload.addEventListener('click', () => settingsInput.click());
+                settingsInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    if (file.size > 2 * 1024 * 1024) { this.toast('图片不能超过2MB'); return; }
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        window._avatarDataUrl = ev.target.result;
+                        if (settingsPreview) {
+                            settingsPreview.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }, 100);
     },
 
     exportData() {
