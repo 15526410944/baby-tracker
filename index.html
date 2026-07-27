@@ -2524,7 +2524,15 @@ const App = {
                 </div>
             </div>
             <div class="form-group">
-                <label class="form-label">头像表情</label>
+                <label class="form-label">头像</label>
+                <div style="display:flex;align-items:center;gap:12px">
+                    <div id="avatarPreview" style="width:56px;height:56px;border-radius:50%;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:28px;border:2px solid #eee;overflow:hidden">${db.baby.avatar && db.baby.avatar.startsWith('data:image/') ? `<img src="${db.baby.avatar}" style="width:100%;height:100%;object-fit:cover">` : (db.baby.avatar || '👶')}</div>
+                    <button type="button" class="btn btn-outline" id="uploadAvatarBtn" style="padding:8px 16px;font-size:13px">📷 从相册选择</button>
+                </div>
+                <input type="file" id="avatarFileInput2" accept="image/*" style="display:none">
+            </div>
+            <div class="form-group">
+                <label class="form-label">或选择表情</label>
                 <div class="form-chips" id="avatarChips">
                     ${['👶','🧒','👧','👦','😇','🥰','🌟','🐰'].map(a =>
                         `<div class="form-chip ${db.baby.avatar === a ? 'active' : ''}" data-value="${a}" style="font-size:20px">${a}</div>`
@@ -2540,13 +2548,41 @@ const App = {
             if (!birthDate) { this.toast('请选择出生日期'); return false; }
 
             const gender = document.querySelector('#genderChips .active')?.dataset.value || '';
-            const avatar = document.querySelector('#avatarChips .active')?.dataset.value || '👶';
+            // 优先取上传的照片，否则取选中的表情
+            let avatar = window._avatarDataUrl || '';
+            if (!avatar) {
+                avatar = document.querySelector('#avatarChips .active')?.dataset.value || '👶';
+            }
 
             Storage.updateBaby({ name, birthDate, gender, avatar });
             this.renderBabyInfo();
             this.renderDashboard();
             this.toast('保存成功');
+            window._avatarDataUrl = null;
         });
+
+        // 上传按钮事件
+        setTimeout(() => {
+            const uploadBtn = document.getElementById('uploadAvatarBtn');
+            const fileInput2 = document.getElementById('avatarFileInput2');
+            const preview = document.getElementById('avatarPreview');
+            if (uploadBtn && fileInput2) {
+                uploadBtn.addEventListener('click', () => fileInput2.click());
+                fileInput2.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    if (file.size > 2 * 1024 * 1024) { this.toast('图片不能超过2MB'); return; }
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        window._avatarDataUrl = ev.target.result;
+                        preview.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover">`;
+                        // 清除表情选中
+                        document.querySelectorAll('#avatarChips .active').forEach(c => c.classList.remove('active'));
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }, 100);
 
         // 绑定chip选择
         this.bindChips('genderChips');
