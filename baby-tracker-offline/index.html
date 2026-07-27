@@ -111,14 +111,6 @@ input, textarea, select {
     justify-content: center;
     font-size: 26px;
     border: 2px solid rgba(255,255,255,0.5);
-    cursor: pointer;
-    overflow: hidden;
-    transition: transform 0.15s;
-    background-size: cover;
-    background-position: center;
-}
-.baby-avatar:active {
-    transform: scale(0.93);
 }
 
 .baby-details {
@@ -485,33 +477,10 @@ input, textarea, select {
     font-weight: 500;
 }
 
-.record-actions {
+.record-delete {
     position: absolute;
     top: 10px;
     right: 10px;
-    display: flex;
-    gap: 4px;
-}
-
-.record-edit {
-    color: var(--text-lighter);
-    font-size: 14px;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: all 0.2s;
-    opacity: 0.5;
-}
-
-.record-edit:active {
-    opacity: 1;
-    color: #FF8FA3;
-}
-
-.record-delete {
     color: var(--text-lighter);
     font-size: 16px;
     width: 28px;
@@ -745,14 +714,6 @@ input, textarea, select {
     font-size: 24px;
     border: 2px solid rgba(255,255,255,0.5);
     margin-bottom: 6px;
-    cursor: pointer;
-    overflow: hidden;
-    transition: transform 0.15s;
-    background-size: cover;
-    background-position: center;
-}
-.sidebar-avatar:active {
-    transform: scale(0.93);
 }
 
 .sidebar-name {
@@ -1171,7 +1132,7 @@ input, textarea, select {
         <!-- 左侧边栏导航 -->
         <nav class="sidebar-nav">
             <div class="sidebar-header">
-                <div class="sidebar-avatar" id="sidebarAvatar" title="点击更换头像"></div>
+                <div class="sidebar-avatar" id="sidebarAvatar"></div>
                 <div class="sidebar-name" id="sidebarName">宝宝成长记</div>
             </div>
             <div class="sidebar-menu">
@@ -1210,7 +1171,7 @@ input, textarea, select {
             <header class="app-header">
                 <div class="header-content">
                     <div class="baby-info" id="babyInfo">
-                        <div class="baby-avatar" id="babyAvatar" title="点击更换头像">👶</div>
+                        <div class="baby-avatar" id="babyAvatar">👶</div>
                         <div class="baby-details">
                             <div class="baby-name" id="babyName">点击设置宝宝信息</div>
                             <div class="baby-age" id="babyAge">设置出生日期</div>
@@ -1689,36 +1650,6 @@ const App = {
             sidebarSettings.addEventListener('click', () => this.showSettings());
         }
 
-        // 头像点击上传
-        const fileInput = document.getElementById('avatarFileInput');
-        const handleAvatarClick = () => {
-            if (fileInput) fileInput.click();
-        };
-        document.getElementById('babyAvatar').addEventListener('click', handleAvatarClick);
-        const sidebarAvatar = document.getElementById('sidebarAvatar');
-        if (sidebarAvatar) sidebarAvatar.addEventListener('click', handleAvatarClick);
-
-        // 文件选择处理
-        if (fileInput) {
-            fileInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                if (file.size > 2 * 1024 * 1024) {
-                    this.toast('图片不能超过2MB哦');
-                    return;
-                }
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    const db = Storage.load();
-                    db.baby.avatar = ev.target.result;
-                    Storage.save(db);
-                    this.renderBabyInfo();
-                    this.toast('头像更新成功');
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
         // 概览卡片跳转
         document.querySelectorAll('.overview-card').forEach(card => {
             card.addEventListener('click', () => {
@@ -1812,34 +1743,9 @@ const App = {
     // ===== 渲染宝宝信息 =====
     renderBabyInfo() {
         const db = Storage.load();
-        const avatar = db.baby.avatar || '👶';
-        const isPhoto = avatar.startsWith('data:image/');
-
-        // 顶部头像
-        const babyAvatar = document.getElementById('babyAvatar');
-        if (isPhoto) {
-            babyAvatar.textContent = '';
-            babyAvatar.style.backgroundImage = `url(${avatar})`;
-            babyAvatar.style.backgroundSize = 'cover';
-            babyAvatar.style.backgroundPosition = 'center';
-        } else {
-            babyAvatar.style.backgroundImage = '';
-            babyAvatar.textContent = avatar;
-        }
-
-        // 侧边栏头像
+        document.getElementById('babyAvatar').textContent = db.baby.avatar || '👶';
         const sidebarAvatar = document.getElementById('sidebarAvatar');
-        if (sidebarAvatar) {
-            if (isPhoto) {
-                sidebarAvatar.textContent = '';
-                sidebarAvatar.style.backgroundImage = `url(${avatar})`;
-                sidebarAvatar.style.backgroundSize = 'cover';
-                sidebarAvatar.style.backgroundPosition = 'center';
-            } else {
-                sidebarAvatar.style.backgroundImage = '';
-                sidebarAvatar.textContent = avatar;
-            }
-        }
+        if (sidebarAvatar) sidebarAvatar.textContent = db.baby.avatar || '👶';
         if (db.baby.name) {
             document.getElementById('babyName').textContent = db.baby.name;
             const sidebarName = document.getElementById('sidebarName');
@@ -2008,10 +1914,7 @@ const App = {
                 <div class="record-tags">
                     ${r.doctor ? `<span class="record-tag">医生: ${this.escape(r.doctor)}</span>` : ''}
                 </div>
-                <div class="record-actions">
-                    <button class="record-edit" onclick="App.editRecord('medical','${r.id}')">✏️</button>
-                    <button class="record-delete" onclick="App.deleteRecord('medical','${r.id}')">🗑</button>
-                </div>
+                <button class="record-delete" onclick="App.deleteRecord('medical','${r.id}')">🗑</button>
             </div>
         `).join('');
     },
@@ -2035,10 +1938,7 @@ const App = {
                     ${r.batchNo ? '<strong>批号：</strong>' + this.escape(r.batchNo) + '<br>' : ''}
                     ${r.reaction ? '<strong>反应：</strong>' + this.escape(r.reaction) : ''}
                 </div>
-                <div class="record-actions">
-                    <button class="record-edit" onclick="App.editRecord('vaccine','${r.id}')">✏️</button>
-                    <button class="record-delete" onclick="App.deleteRecord('vaccine','${r.id}')">🗑</button>
-                </div>
+                <button class="record-delete" onclick="App.deleteRecord('vaccine','${r.id}')">🗑</button>
             </div>
         `).join('');
     },
@@ -2063,10 +1963,7 @@ const App = {
                     ${r.result ? '<strong>结果：</strong>' + this.escape(r.result) + '<br>' : ''}
                     ${r.advice ? '<strong>建议：</strong>' + this.escape(r.advice) : ''}
                 </div>
-                <div class="record-actions">
-                    <button class="record-edit" onclick="App.editRecord('checkup','${r.id}')">✏️</button>
-                    <button class="record-delete" onclick="App.deleteRecord('checkup','${r.id}')">🗑</button>
-                </div>
+                <button class="record-delete" onclick="App.deleteRecord('checkup','${r.id}')">🗑</button>
             </div>
         `).join('');
     },
@@ -2090,10 +1987,7 @@ const App = {
                     ${r.reason ? '<strong>原因：</strong>' + this.escape(r.reason) + '<br>' : ''}
                     ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
-                <div class="record-actions">
-                    <button class="record-edit" onclick="App.editRecord('medication','${r.id}')">✏️</button>
-                    <button class="record-delete" onclick="App.deleteRecord('medication','${r.id}')">🗑</button>
-                </div>
+                <button class="record-delete" onclick="App.deleteRecord('medication','${r.id}')">🗑</button>
             </div>
         `).join('');
     },
@@ -2141,10 +2035,7 @@ const App = {
                     ${r.foodName ? '<strong>食物：</strong>' + this.escape(r.foodName) + '<br>' : ''}
                     ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
-                <div class="record-actions">
-                    <button class="record-edit" onclick="App.editRecord('feeding','${r.id}')">✏️</button>
-                    <button class="record-delete" onclick="App.deleteRecord('feeding','${r.id}')">🗑</button>
-                </div>
+                <button class="record-delete" onclick="App.deleteRecord('feeding','${r.id}')">🗑</button>
             </div>
         `).join('');
     },
@@ -2175,10 +2066,7 @@ const App = {
                     ${r.quality ? '<strong>质量：</strong>' + this.escape(r.quality) + '<br>' : ''}
                     ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
-                <div class="record-actions">
-                    <button class="record-edit" onclick="App.editRecord('sleep','${r.id}')">✏️</button>
-                    <button class="record-delete" onclick="App.deleteRecord('sleep','${r.id}')">🗑</button>
-                </div>
+                <button class="record-delete" onclick="App.deleteRecord('sleep','${r.id}')">🗑</button>
             </div>
         `).join('');
     },
@@ -2210,10 +2098,7 @@ const App = {
                     ${r.weather ? '<strong>天气：</strong>' + this.escape(r.weather) + '<br>' : ''}
                     ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
-                <div class="record-actions">
-                    <button class="record-edit" onclick="App.editRecord('outdoor','${r.id}')">✏️</button>
-                    <button class="record-delete" onclick="App.deleteRecord('outdoor','${r.id}')">🗑</button>
-                </div>
+                <button class="record-delete" onclick="App.deleteRecord('outdoor','${r.id}')">🗑</button>
             </div>
         `).join('');
     },
@@ -2236,10 +2121,7 @@ const App = {
                     ${r.content ? '<strong>内容：</strong>' + this.escape(r.content) + '<br>' : ''}
                     ${r.reaction ? '<strong>宝宝反应：</strong>' + this.escape(r.reaction) : ''}
                 </div>
-                <div class="record-actions">
-                    <button class="record-edit" onclick="App.editRecord('story','${r.id}')">✏️</button>
-                    <button class="record-delete" onclick="App.deleteRecord('story','${r.id}')">🗑</button>
-                </div>
+                <button class="record-delete" onclick="App.deleteRecord('story','${r.id}')">🗑</button>
             </div>
         `).join('');
     },
@@ -2261,10 +2143,7 @@ const App = {
                 <div class="record-detail">
                     ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
-                <div class="record-actions">
-                    <button class="record-edit" onclick="App.editRecord('diaper','${r.id}')">✏️</button>
-                    <button class="record-delete" onclick="App.deleteRecord('diaper','${r.id}')">🗑</button>
-                </div>
+                <button class="record-delete" onclick="App.deleteRecord('diaper','${r.id}')">🗑</button>
             </div>
         `).join('');
     },
@@ -2286,10 +2165,7 @@ const App = {
                     ${r.duration ? '<strong>时长：</strong>' + r.duration + '分钟<br>' : ''}
                     ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
-                <div class="record-actions">
-                    <button class="record-edit" onclick="App.editRecord('bath','${r.id}')">✏️</button>
-                    <button class="record-delete" onclick="App.deleteRecord('bath','${r.id}')">🗑</button>
-                </div>
+                <button class="record-delete" onclick="App.deleteRecord('bath','${r.id}')">🗑</button>
             </div>
         `).join('');
     },
@@ -2454,10 +2330,7 @@ const App = {
                     ${r.headCircumference ? '<strong>头围：</strong>' + r.headCircumference + 'cm<br>' : ''}
                     ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
-                <div class="record-actions">
-                    <button class="record-edit" onclick="App.editRecord('growth','${r.id}')">✏️</button>
-                    <button class="record-delete" onclick="App.deleteRecord('growth','${r.id}')">🗑</button>
-                </div>
+                <button class="record-delete" onclick="App.deleteRecord('growth','${r.id}')">🗑</button>
             </div>
         `).join('');
     },
@@ -2481,10 +2354,7 @@ const App = {
                     <div class="milestone-date">${Utils.formatDateFull(r.date)} · ${Utils.calcAge(Storage.load().baby.birthDate && Utils.daysDiff(Storage.load().baby.birthDate, r.date) >= 0 ? Storage.load().baby.birthDate : r.date)}</div>
                     ${r.note ? '<div class="milestone-note">' + this.escape(r.note) + '</div>' : ''}
                 </div>
-                <div class="record-actions">
-                    <button class="record-edit" onclick="App.editRecord('milestone','${r.id}')">✏️</button>
-                    <button class="record-delete" onclick="App.deleteRecord('milestone','${r.id}')">🗑</button>
-                </div>
+                <button class="record-delete" onclick="App.deleteRecord('milestone','${r.id}')">🗑</button>
             </div>
         `).join('');
     },
@@ -2506,10 +2376,7 @@ const App = {
                     ${r.level ? '<strong>掌握程度：</strong>' + this.escape(r.level) + '<br>' : ''}
                     ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
-                <div class="record-actions">
-                    <button class="record-edit" onclick="App.editRecord('motor','${r.id}')">✏️</button>
-                    <button class="record-delete" onclick="App.deleteRecord('motor','${r.id}')">🗑</button>
-                </div>
+                <button class="record-delete" onclick="App.deleteRecord('motor','${r.id}')">🗑</button>
             </div>
         `).join('');
     },
@@ -2530,10 +2397,7 @@ const App = {
                     <div class="diary-mood">${moodMap[r.mood] || '📝'}</div>
                 </div>
                 <div class="diary-content">${this.escape(r.content || '')}</div>
-                <div class="record-actions">
-                    <button class="record-edit" onclick="App.editRecord('diary','${r.id}')">✏️</button>
-                    <button class="record-delete" onclick="App.deleteRecord('diary','${r.id}')">🗑</button>
-                </div>
+                <button class="record-delete" onclick="App.deleteRecord('diary','${r.id}')">🗑</button>
             </div>
         `).join('');
     },
@@ -2547,59 +2411,6 @@ const App = {
         const activePage = document.querySelector('.page.active').id.replace('page-', '');
         this.switchPage(activePage);
         this.toast('已删除');
-    },
-
-    editRecord(type, id) {
-        const db = Storage.load();
-        const record = (db[type] || []).find(r => r.id === id);
-        if (!record) return;
-
-        // 构建通用编辑表单
-        let fields = '';
-        for (const [key, value] of Object.entries(record)) {
-            if (['id', 'createdAt'].includes(key)) continue;
-            const label = this.getFieldLabel(key);
-            if (!label) continue;
-
-            if (key === 'note' || key === 'reaction' || key === 'symptom' || key === 'diagnosis' || key === 'prescription' ||
-                key === 'result' || key === 'advice' || key === 'content' || key === 'description' || key === 'reaction') {
-                fields += `<div class="form-group"><label class="form-label">${label}</label><textarea class="form-textarea" id="edit_${key}">${this.escape(value || '')}</textarea></div>`;
-            } else if (key === 'date') {
-                fields += `<div class="form-group"><label class="form-label">${label} <span class="required">*</span></label><input type="date" class="form-input" id="edit_${key}" value="${value || ''}"></div>`;
-            } else {
-                fields += `<div class="form-group"><label class="form-label">${label}</label><input type="text" class="form-input" id="edit_${key}" value="${this.escape(value || '')}"></div>`;
-            }
-        }
-
-        this.showModal('编辑记录', fields, () => {
-            const updates = {};
-            for (const [key] of Object.entries(record)) {
-                if (['id', 'createdAt'].includes(key)) continue;
-                const el = document.getElementById('edit_' + key);
-                if (el) updates[key] = el.value;
-            }
-            Storage.update(type, id, updates);
-            this.renderAll();
-            const activePage = document.querySelector('.page.active').id.replace('page-', '');
-            this.switchPage(activePage);
-            this.toast('记录已更新');
-        });
-    },
-
-    getFieldLabel(key) {
-        const labels = {
-            date: '日期', time: '时间', startTime: '开始时间', endTime: '结束时间',
-            duration: '时长', type: '类型', amount: '数量', unit: '单位',
-            vaccineName: '疫苗名称', dose: '剂次', location: '地点', batchNo: '批号',
-            reaction: '接种反应', cost: '费用', doctor: '医生', hospital: '医院',
-            department: '科室', symptom: '症状', diagnosis: '诊断', prescription: '处方',
-            note: '备注', age: '月龄', height: '身高(cm)', weight: '体重(kg)',
-            headCircumference: '头围(cm)', fontanelle: '前囟门(cm)', result: '结果',
-            advice: '建议', drugName: '药品名称', dosage: '剂量', frequency: '频率',
-            food: '食物', method: '方式', content: '内容', title: '标题',
-            milestone: '里程碑', skill: '技能', description: '描述', date: '日期'
-        };
-        return labels[key] || key;
     },
 
     // ===== 模态框 =====
@@ -2642,15 +2453,7 @@ const App = {
                 </div>
             </div>
             <div class="form-group">
-                <label class="form-label">头像</label>
-                <div style="display:flex;align-items:center;gap:12px">
-                    <div id="avatarPreview" style="width:56px;height:56px;border-radius:50%;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:28px;border:2px solid #eee;overflow:hidden">${db.baby.avatar && db.baby.avatar.startsWith('data:image/') ? `<img src="${db.baby.avatar}" style="width:100%;height:100%;object-fit:cover">` : (db.baby.avatar || '👶')}</div>
-                    <button type="button" class="btn btn-outline" id="uploadAvatarBtn" style="padding:8px 16px;font-size:13px">📷 从相册选择</button>
-                </div>
-                <input type="file" id="avatarFileInput2" accept="image/*" style="display:none">
-            </div>
-            <div class="form-group">
-                <label class="form-label">或选择表情</label>
+                <label class="form-label">头像表情</label>
                 <div class="form-chips" id="avatarChips">
                     ${['👶','🧒','👧','👦','😇','🥰','🌟','🐰'].map(a =>
                         `<div class="form-chip ${db.baby.avatar === a ? 'active' : ''}" data-value="${a}" style="font-size:20px">${a}</div>`
@@ -2666,41 +2469,13 @@ const App = {
             if (!birthDate) { this.toast('请选择出生日期'); return false; }
 
             const gender = document.querySelector('#genderChips .active')?.dataset.value || '';
-            // 优先取上传的照片，否则取选中的表情
-            let avatar = window._avatarDataUrl || '';
-            if (!avatar) {
-                avatar = document.querySelector('#avatarChips .active')?.dataset.value || '👶';
-            }
+            const avatar = document.querySelector('#avatarChips .active')?.dataset.value || '👶';
 
             Storage.updateBaby({ name, birthDate, gender, avatar });
             this.renderBabyInfo();
             this.renderDashboard();
             this.toast('保存成功');
-            window._avatarDataUrl = null;
         });
-
-        // 上传按钮事件
-        setTimeout(() => {
-            const uploadBtn = document.getElementById('uploadAvatarBtn');
-            const fileInput2 = document.getElementById('avatarFileInput2');
-            const preview = document.getElementById('avatarPreview');
-            if (uploadBtn && fileInput2) {
-                uploadBtn.addEventListener('click', () => fileInput2.click());
-                fileInput2.addEventListener('change', (e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    if (file.size > 2 * 1024 * 1024) { this.toast('图片不能超过2MB'); return; }
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        window._avatarDataUrl = ev.target.result;
-                        preview.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover">`;
-                        // 清除表情选中
-                        document.querySelectorAll('#avatarChips .active').forEach(c => c.classList.remove('active'));
-                    };
-                    reader.readAsDataURL(file);
-                });
-            }
-        }, 100);
 
         // 绑定chip选择
         this.bindChips('genderChips');
@@ -2711,14 +2486,6 @@ const App = {
     showSettings() {
         const db = Storage.load();
         const body = `
-            <div class="settings-section">
-                <div class="settings-section-title">宝宝头像</div>
-                <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-                    <div id="settingsAvatarPreview" style="width:60px;height:60px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:30px;overflow:hidden;border:2px solid #eee">${db.baby.avatar && db.baby.avatar.startsWith('data:image/') ? `<img src="${db.baby.avatar}" style="width:100%;height:100%;object-fit:cover">` : (db.baby.avatar || '👶')}</div>
-                    <button type="button" class="btn btn-outline" id="settingsAvatarUpload" style="padding:8px 16px;font-size:13px">📷 选择照片</button>
-                    <input type="file" id="settingsAvatarInput" accept="image/*" style="display:none">
-                </div>
-            </div>
             <div class="settings-section">
                 <div class="settings-section-title">作息目标</div>
                 <div class="form-group">
@@ -2748,43 +2515,12 @@ const App = {
         `;
 
         this.showModal('设置', body, () => {
-            // 检查是否有新上传的头像
-            if (window._avatarDataUrl) {
-                const db = Storage.load();
-                db.baby.avatar = window._avatarDataUrl;
-                Storage.save(db);
-                this.renderBabyInfo();
-                window._avatarDataUrl = null;
-            }
             const storyTime = document.getElementById('storyTimeInput').value;
             const outdoorGoal = parseInt(document.getElementById('outdoorGoalInput').value) || 120;
             const sleepGoal = parseFloat(document.getElementById('sleepGoalInput').value) || 14;
             Storage.updateSettings({ storyTime, outdoorGoal, sleepGoal });
             this.toast('设置已保存');
         });
-
-        // 设置弹窗里的头像上传
-        setTimeout(() => {
-            const settingsUpload = document.getElementById('settingsAvatarUpload');
-            const settingsInput = document.getElementById('settingsAvatarInput');
-            const settingsPreview = document.getElementById('settingsAvatarPreview');
-            if (settingsUpload && settingsInput) {
-                settingsUpload.addEventListener('click', () => settingsInput.click());
-                settingsInput.addEventListener('change', (e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    if (file.size > 2 * 1024 * 1024) { this.toast('图片不能超过2MB'); return; }
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        window._avatarDataUrl = ev.target.result;
-                        if (settingsPreview) {
-                            settingsPreview.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
-                        }
-                    };
-                    reader.readAsDataURL(file);
-                });
-            }
-        }, 100);
     },
 
     exportData() {
@@ -3748,6 +3484,5 @@ self.addEventListener("fetch",e=>{e.respondWith(caches.match(e.request).then(r=>
 // 启动应用
 document.addEventListener('DOMContentLoaded', () => App.init());
 </script>
-    <input type="file" id="avatarFileInput" accept="image/*" style="display:none">
 </body>
 </html>

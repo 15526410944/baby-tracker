@@ -485,10 +485,33 @@ input, textarea, select {
     font-weight: 500;
 }
 
-.record-delete {
+.record-actions {
     position: absolute;
     top: 10px;
     right: 10px;
+    display: flex;
+    gap: 4px;
+}
+
+.record-edit {
+    color: var(--text-lighter);
+    font-size: 14px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+    opacity: 0.5;
+}
+
+.record-edit:active {
+    opacity: 1;
+    color: #FF8FA3;
+}
+
+.record-delete {
     color: var(--text-lighter);
     font-size: 16px;
     width: 28px;
@@ -1985,7 +2008,10 @@ const App = {
                 <div class="record-tags">
                     ${r.doctor ? `<span class="record-tag">医生: ${this.escape(r.doctor)}</span>` : ''}
                 </div>
-                <button class="record-delete" onclick="App.deleteRecord('medical','${r.id}')">🗑</button>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('medical','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('medical','${r.id}')">🗑</button>
+                </div>
             </div>
         `).join('');
     },
@@ -2009,7 +2035,10 @@ const App = {
                     ${r.batchNo ? '<strong>批号：</strong>' + this.escape(r.batchNo) + '<br>' : ''}
                     ${r.reaction ? '<strong>反应：</strong>' + this.escape(r.reaction) : ''}
                 </div>
-                <button class="record-delete" onclick="App.deleteRecord('vaccine','${r.id}')">🗑</button>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('vaccine','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('vaccine','${r.id}')">🗑</button>
+                </div>
             </div>
         `).join('');
     },
@@ -2034,7 +2063,10 @@ const App = {
                     ${r.result ? '<strong>结果：</strong>' + this.escape(r.result) + '<br>' : ''}
                     ${r.advice ? '<strong>建议：</strong>' + this.escape(r.advice) : ''}
                 </div>
-                <button class="record-delete" onclick="App.deleteRecord('checkup','${r.id}')">🗑</button>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('checkup','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('checkup','${r.id}')">🗑</button>
+                </div>
             </div>
         `).join('');
     },
@@ -2058,7 +2090,10 @@ const App = {
                     ${r.reason ? '<strong>原因：</strong>' + this.escape(r.reason) + '<br>' : ''}
                     ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
-                <button class="record-delete" onclick="App.deleteRecord('medication','${r.id}')">🗑</button>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('medication','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('medication','${r.id}')">🗑</button>
+                </div>
             </div>
         `).join('');
     },
@@ -2106,7 +2141,10 @@ const App = {
                     ${r.foodName ? '<strong>食物：</strong>' + this.escape(r.foodName) + '<br>' : ''}
                     ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
-                <button class="record-delete" onclick="App.deleteRecord('feeding','${r.id}')">🗑</button>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('feeding','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('feeding','${r.id}')">🗑</button>
+                </div>
             </div>
         `).join('');
     },
@@ -2137,7 +2175,10 @@ const App = {
                     ${r.quality ? '<strong>质量：</strong>' + this.escape(r.quality) + '<br>' : ''}
                     ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
-                <button class="record-delete" onclick="App.deleteRecord('sleep','${r.id}')">🗑</button>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('sleep','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('sleep','${r.id}')">🗑</button>
+                </div>
             </div>
         `).join('');
     },
@@ -2169,7 +2210,10 @@ const App = {
                     ${r.weather ? '<strong>天气：</strong>' + this.escape(r.weather) + '<br>' : ''}
                     ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
-                <button class="record-delete" onclick="App.deleteRecord('outdoor','${r.id}')">🗑</button>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('outdoor','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('outdoor','${r.id}')">🗑</button>
+                </div>
             </div>
         `).join('');
     },
@@ -2192,7 +2236,10 @@ const App = {
                     ${r.content ? '<strong>内容：</strong>' + this.escape(r.content) + '<br>' : ''}
                     ${r.reaction ? '<strong>宝宝反应：</strong>' + this.escape(r.reaction) : ''}
                 </div>
-                <button class="record-delete" onclick="App.deleteRecord('story','${r.id}')">🗑</button>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('story','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('story','${r.id}')">🗑</button>
+                </div>
             </div>
         `).join('');
     },
@@ -2214,7 +2261,10 @@ const App = {
                 <div class="record-detail">
                     ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
-                <button class="record-delete" onclick="App.deleteRecord('diaper','${r.id}')">🗑</button>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('diaper','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('diaper','${r.id}')">🗑</button>
+                </div>
             </div>
         `).join('');
     },
@@ -2236,7 +2286,10 @@ const App = {
                     ${r.duration ? '<strong>时长：</strong>' + r.duration + '分钟<br>' : ''}
                     ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
-                <button class="record-delete" onclick="App.deleteRecord('bath','${r.id}')">🗑</button>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('bath','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('bath','${r.id}')">🗑</button>
+                </div>
             </div>
         `).join('');
     },
@@ -2401,7 +2454,10 @@ const App = {
                     ${r.headCircumference ? '<strong>头围：</strong>' + r.headCircumference + 'cm<br>' : ''}
                     ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
-                <button class="record-delete" onclick="App.deleteRecord('growth','${r.id}')">🗑</button>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('growth','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('growth','${r.id}')">🗑</button>
+                </div>
             </div>
         `).join('');
     },
@@ -2425,7 +2481,10 @@ const App = {
                     <div class="milestone-date">${Utils.formatDateFull(r.date)} · ${Utils.calcAge(Storage.load().baby.birthDate && Utils.daysDiff(Storage.load().baby.birthDate, r.date) >= 0 ? Storage.load().baby.birthDate : r.date)}</div>
                     ${r.note ? '<div class="milestone-note">' + this.escape(r.note) + '</div>' : ''}
                 </div>
-                <button class="record-delete" onclick="App.deleteRecord('milestone','${r.id}')">🗑</button>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('milestone','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('milestone','${r.id}')">🗑</button>
+                </div>
             </div>
         `).join('');
     },
@@ -2447,7 +2506,10 @@ const App = {
                     ${r.level ? '<strong>掌握程度：</strong>' + this.escape(r.level) + '<br>' : ''}
                     ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
-                <button class="record-delete" onclick="App.deleteRecord('motor','${r.id}')">🗑</button>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('motor','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('motor','${r.id}')">🗑</button>
+                </div>
             </div>
         `).join('');
     },
@@ -2468,7 +2530,10 @@ const App = {
                     <div class="diary-mood">${moodMap[r.mood] || '📝'}</div>
                 </div>
                 <div class="diary-content">${this.escape(r.content || '')}</div>
-                <button class="record-delete" onclick="App.deleteRecord('diary','${r.id}')">🗑</button>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('diary','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('diary','${r.id}')">🗑</button>
+                </div>
             </div>
         `).join('');
     },
@@ -2482,6 +2547,59 @@ const App = {
         const activePage = document.querySelector('.page.active').id.replace('page-', '');
         this.switchPage(activePage);
         this.toast('已删除');
+    },
+
+    editRecord(type, id) {
+        const db = Storage.load();
+        const record = (db[type] || []).find(r => r.id === id);
+        if (!record) return;
+
+        // 构建通用编辑表单
+        let fields = '';
+        for (const [key, value] of Object.entries(record)) {
+            if (['id', 'createdAt'].includes(key)) continue;
+            const label = this.getFieldLabel(key);
+            if (!label) continue;
+
+            if (key === 'note' || key === 'reaction' || key === 'symptom' || key === 'diagnosis' || key === 'prescription' ||
+                key === 'result' || key === 'advice' || key === 'content' || key === 'description' || key === 'reaction') {
+                fields += `<div class="form-group"><label class="form-label">${label}</label><textarea class="form-textarea" id="edit_${key}">${this.escape(value || '')}</textarea></div>`;
+            } else if (key === 'date') {
+                fields += `<div class="form-group"><label class="form-label">${label} <span class="required">*</span></label><input type="date" class="form-input" id="edit_${key}" value="${value || ''}"></div>`;
+            } else {
+                fields += `<div class="form-group"><label class="form-label">${label}</label><input type="text" class="form-input" id="edit_${key}" value="${this.escape(value || '')}"></div>`;
+            }
+        }
+
+        this.showModal('编辑记录', fields, () => {
+            const updates = {};
+            for (const [key] of Object.entries(record)) {
+                if (['id', 'createdAt'].includes(key)) continue;
+                const el = document.getElementById('edit_' + key);
+                if (el) updates[key] = el.value;
+            }
+            Storage.update(type, id, updates);
+            this.renderAll();
+            const activePage = document.querySelector('.page.active').id.replace('page-', '');
+            this.switchPage(activePage);
+            this.toast('记录已更新');
+        });
+    },
+
+    getFieldLabel(key) {
+        const labels = {
+            date: '日期', time: '时间', startTime: '开始时间', endTime: '结束时间',
+            duration: '时长', type: '类型', amount: '数量', unit: '单位',
+            vaccineName: '疫苗名称', dose: '剂次', location: '地点', batchNo: '批号',
+            reaction: '接种反应', cost: '费用', doctor: '医生', hospital: '医院',
+            department: '科室', symptom: '症状', diagnosis: '诊断', prescription: '处方',
+            note: '备注', age: '月龄', height: '身高(cm)', weight: '体重(kg)',
+            headCircumference: '头围(cm)', fontanelle: '前囟门(cm)', result: '结果',
+            advice: '建议', drugName: '药品名称', dosage: '剂量', frequency: '频率',
+            food: '食物', method: '方式', content: '内容', title: '标题',
+            milestone: '里程碑', skill: '技能', description: '描述', date: '日期'
+        };
+        return labels[key] || key;
     },
 
     // ===== 模态框 =====

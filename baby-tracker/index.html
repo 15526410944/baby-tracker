@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#FF8FA3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="宝宝成长">
+    <meta name="description" content="记录宝宝成长的每一天">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+    <link rel="icon" type="image/png" href="assets/icon-192.png">
+    <link rel="stylesheet" href="css/style.css">
+    <title>宝宝成长记</title>
+</head>
+<body>
+    <div id="app">
+        <!-- 左侧边栏导航 -->
+        <nav class="sidebar-nav">
+            <div class="sidebar-header">
+                <div class="sidebar-avatar" id="sidebarAvatar" title="点击更换头像"></div>
+                <div class="sidebar-name" id="sidebarName">宝宝成长记</div>
+            </div>
+            <div class="sidebar-menu">
+                <button class="nav-btn active" data-page="dashboard">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-label">首页</span>
+                </button>
+                <button class="nav-btn" data-page="health">
+                    <span class="nav-icon">🏥</span>
+                    <span class="nav-label">健康</span>
+                </button>
+                <button class="nav-btn" data-page="daily">
+                    <span class="nav-icon">📅</span>
+                    <span class="nav-label">日常</span>
+                </button>
+                <button class="nav-btn" data-page="growth">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-label">成长</span>
+                </button>
+                <button class="nav-btn" data-page="diary">
+                    <span class="nav-icon">📔</span>
+                    <span class="nav-label">日记</span>
+                </button>
+            </div>
+            <div class="sidebar-footer">
+                <button class="nav-btn" id="sidebarSettings">
+                    <span class="nav-icon">️</span>
+                    <span class="nav-label">设置</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- 主内容区 -->
+        <div class="main-wrapper">
+            <!-- 顶部状态栏 -->
+            <header class="app-header">
+                <div class="header-content">
+                    <div class="baby-info" id="babyInfo">
+                        <div class="baby-avatar" id="babyAvatar" title="点击更换头像">👶</div>
+                        <div class="baby-details">
+                            <div class="baby-name" id="babyName">点击设置宝宝信息</div>
+                            <div class="baby-age" id="babyAge">设置出生日期</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="app-main" id="mainContent">
+            <!-- 首页仪表盘 -->
+            <section class="page page-dashboard active" id="page-dashboard">
+                <div class="dashboard-greeting" id="greeting">早安 👋</div>
+                <div class="dashboard-date" id="todayDate"></div>
+
+                <!-- 今日概览卡片 -->
+                <div class="overview-cards">
+                    <div class="overview-card" data-nav="feeding">
+                        <div class="overview-icon">🍼</div>
+                        <div class="overview-label">今日喂养</div>
+                        <div class="overview-value" id="todayFeeding">0次</div>
+                    </div>
+                    <div class="overview-card" data-nav="sleep">
+                        <div class="overview-icon">😴</div>
+                        <div class="overview-label">今日睡眠</div>
+                        <div class="overview-value" id="todaySleep">0h</div>
+                    </div>
+                    <div class="overview-card" data-nav="outdoor">
+                        <div class="overview-icon">🌳</div>
+                        <div class="overview-label">户外时间</div>
+                        <div class="overview-value" id="todayOutdoor">0min</div>
+                    </div>
+                    <div class="overview-card" data-nav="story">
+                        <div class="overview-icon">📖</div>
+                        <div class="overview-label">故事时间</div>
+                        <div class="overview-value" id="todayStory">0次</div>
+                    </div>
+                </div>
+
+                <!-- 快捷操作 -->
+                <div class="section-title">快捷记录</div>
+                <div class="quick-actions">
+                    <button class="quick-btn" data-action="quick-feed">🍼 记录喂奶</button>
+                    <button class="quick-btn" data-action="quick-sleep">😴 记录睡眠</button>
+                    <button class="quick-btn" data-action="quick-diaper">🧷 换尿布</button>
+                    <button class="quick-btn" data-action="quick-outdoor">🌳 户外活动</button>
+                    <button class="quick-btn" data-action="quick-story">📖 故事时间</button>
+                    <button class="quick-btn" data-action="quick-diary">📝 写日记</button>
+                </div>
+
+                <!-- 今日时间线 -->
+                <div class="section-title">
+                    今日时间线
+                    <span class="section-action" id="clearTodayTimeline">清空</span>
+                </div>
+                <div class="timeline" id="todayTimeline">
+                    <div class="empty-state">还没有记录，点击上方按钮开始吧</div>
+                </div>
+            </section>
+
+            <!-- 健康档案页 -->
+            <section class="page" id="page-health">
+                <div class="section-title">健康档案</div>
+                <div class="health-nav">
+                    <button class="health-tab active" data-tab="medical">🏥 就医记录</button>
+                    <button class="health-tab" data-tab="vaccine">💉 疫苗接种</button>
+                    <button class="health-tab" data-tab="checkup">📋 儿保体检</button>
+                    <button class="health-tab" data-tab="medication">💊 用药记录</button>
+                </div>
+
+                <!-- 就医记录 -->
+                <div class="health-content active" id="tab-medical">
+                    <button class="add-btn" data-add="medical">+ 添加就医记录</button>
+                    <div class="record-list" id="medicalList"></div>
+                </div>
+
+                <!-- 疫苗接种 -->
+                <div class="health-content" id="tab-vaccine">
+                    <button class="add-btn" data-add="vaccine">+ 添加疫苗记录</button>
+                    <div class="record-list" id="vaccineList"></div>
+                </div>
+
+                <!-- 儿保体检 -->
+                <div class="health-content" id="tab-checkup">
+                    <button class="add-btn" data-add="checkup">+ 添加体检记录</button>
+                    <div class="record-list" id="checkupList"></div>
+                </div>
+
+                <!-- 用药记录 -->
+                <div class="health-content" id="tab-medication">
+                    <button class="add-btn" data-add="medication">+ 添加用药记录</button>
+                    <div class="record-list" id="medicationList"></div>
+                </div>
+            </section>
+
+            <!-- 日常记录页 -->
+            <section class="page" id="page-daily">
+                <div class="section-title">日常记录</div>
+                <div class="daily-date-selector">
+                    <button class="date-arrow" id="prevDay">‹</button>
+                    <div class="date-display" id="dailyDate"></div>
+                    <button class="date-arrow" id="nextDay">›</button>
+                </div>
+
+                <div class="daily-nav">
+                    <button class="daily-tab active" data-dtab="feeding">🍼 喂养</button>
+                    <button class="daily-tab" data-dtab="sleep">😴 睡眠</button>
+                    <button class="daily-tab" data-dtab="outdoor">🌳 户外</button>
+                    <button class="daily-tab" data-dtab="story">📖 故事</button>
+                    <button class="daily-tab" data-dtab="diaper">🧷 尿布</button>
+                    <button class="daily-tab" data-dtab="bath">🛁 洗澡</button>
+                </div>
+
+                <div class="daily-content active" id="dtab-feeding">
+                    <button class="add-btn" data-dadd="feeding">+ 记录喂养</button>
+                    <div class="record-list" id="feedingList"></div>
+                </div>
+                <div class="daily-content" id="dtab-sleep">
+                    <button class="add-btn" data-dadd="sleep">+ 记录睡眠</button>
+                    <div class="record-list" id="sleepList"></div>
+                </div>
+                <div class="daily-content" id="dtab-outdoor">
+                    <button class="add-btn" data-dadd="outdoor">+ 记录户外</button>
+                    <div class="record-list" id="outdoorList"></div>
+                </div>
+                <div class="daily-content" id="dtab-story">
+                    <button class="add-btn" data-dadd="story">+ 记录故事</button>
+                    <div class="record-list" id="storyList"></div>
+                </div>
+                <div class="daily-content" id="dtab-diaper">
+                    <button class="add-btn" data-dadd="diaper">+ 记录尿布</button>
+                    <div class="record-list" id="diaperList"></div>
+                </div>
+                <div class="daily-content" id="dtab-bath">
+                    <button class="add-btn" data-dadd="bath">+ 记录洗澡</button>
+                    <div class="record-list" id="bathList"></div>
+                </div>
+            </section>
+
+            <!-- 成长发育页 -->
+            <section class="page" id="page-growth">
+                <div class="section-title">成长发育</div>
+
+                <!-- 身高体重 -->
+                <div class="growth-section">
+                    <div class="growth-section-title">📏 身高体重</div>
+                    <button class="add-btn" data-add="growth">+ 记录身高体重</button>
+                    <div class="growth-stats" id="growthStats"></div>
+                    <div class="chart-container">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                    <div class="record-list" id="growthList"></div>
+                </div>
+
+                <!-- 发育里程碑 -->
+                <div class="growth-section">
+                    <div class="growth-section-title">⭐ 发育里程碑</div>
+                    <button class="add-btn" data-add="milestone">+ 记录里程碑</button>
+                    <div class="milestone-list" id="milestoneList"></div>
+                </div>
+
+                <!-- 运动发展 -->
+                <div class="growth-section">
+                    <div class="growth-section-title">🏃 运动发展</div>
+                    <button class="add-btn" data-add="motor">+ 记录运动发展</button>
+                    <div class="record-list" id="motorList"></div>
+                </div>
+            </section>
+
+            <!-- 日记相册页 -->
+            <section class="page" id="page-diary">
+                <div class="section-title">成长日记</div>
+                <button class="add-btn" data-add="diary">+ 写新日记</button>
+                <div class="diary-list" id="diaryList"></div>
+            </section>
+        </main>
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">标题</div>
+                <button class="modal-close" id="modalClose">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" id="modalCancel">取消</button>
+                <button class="btn-confirm" id="modalConfirm">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast提示 -->
+    <div class="toast" id="toast"></div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/app.js"></script>
+    <input type="file" id="avatarFileInput" accept="image/*" style="display:none">
+</body>
+</html>
