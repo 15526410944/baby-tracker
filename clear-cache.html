@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>清除缓存</title>
+</head>
+<body style="padding:40px;font-family:sans-serif;text-align:center">
+<h2>正在清除缓存...</h2>
+<p id="status">请稍等</p>
+<script>
+(async function() {
+    let msg = '';
+    
+    // 1. 注销所有 Service Worker
+    if ('serviceWorker' in navigator) {
+        try {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            for (const reg of regs) {
+                await reg.unregister();
+                msg += '已注销 Service Worker<br>';
+            }
+            if (regs.length === 0) msg += '没有 Service Worker<br>';
+        } catch(e) { msg += 'SW注销失败: ' + e.message + '<br>'; }
+    }
+    
+    // 2. 清除所有缓存
+    if ('caches' in window) {
+        try {
+            const keys = await caches.keys();
+            for (const key of keys) {
+                await caches.delete(key);
+                msg += '已删除缓存: ' + key + '<br>';
+            }
+            if (keys.length === 0) msg += '没有缓存<br>';
+        } catch(e) { msg += '缓存清除失败: ' + e.message + '<br>'; }
+    }
+    
+    // 3. 清除 localStorage（可选，如果要保留数据注释掉这行）
+    // localStorage.clear();
+    // msg += '已清除 localStorage<br>';
+    
+    msg += '<br><b>完成！</b><br>现在请关闭这个页面，<br>然后重新打开新链接。';
+    document.getElementById('status').innerHTML = msg;
+})();
+</script>
+</body>
+</html>

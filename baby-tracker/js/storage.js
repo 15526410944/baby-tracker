@@ -234,6 +234,7 @@ const Utils = {
             return `${days}天`;
         }
     },
+    daysDiff(dateStr1, dateStr2) {
         const d1 = new Date(dateStr1);
         const d2 = new Date(dateStr2);
         return Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
