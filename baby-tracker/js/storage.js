@@ -212,8 +212,28 @@ const Utils = {
         }
     },
 
-    // 计算天数差
-    daysDiff(dateStr1, dateStr2) {
+    // 计算宝宝在某个日期的年龄
+    calcAgeAt(birthDate, targetDate) {
+        if (!birthDate || !targetDate) return '';
+        const birth = new Date(birthDate);
+        const target = new Date(targetDate);
+        const diffMs = target - birth;
+        if (diffMs < 0) return '';
+
+        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const months = Math.floor(days / 30.44);
+        const years = Math.floor(months / 12);
+
+        if (years > 0) {
+            const remainMonths = months % 12;
+            return remainMonths > 0 ? `${years}岁${remainMonths}个月` : `${years}岁`;
+        } else if (months > 0) {
+            const remainDays = days - Math.floor(months * 30.44);
+            return remainDays > 0 ? `${months}个月${remainDays}天` : `${months}个月`;
+        } else {
+            return `${days}天`;
+        }
+    },
         const d1 = new Date(dateStr1);
         const d2 = new Date(dateStr2);
         return Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));

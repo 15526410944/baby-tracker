@@ -183,7 +183,7 @@ const App = {
         if (db.baby.name) {
             document.getElementById('babyName').textContent = db.baby.name;
             const sidebarName = document.getElementById('sidebarName');
-            if (sidebarName) sidebarName.textContent = db.baby.name;
+            if (sidebarName) sidebarName.textContent = db.baby.name + '崽崽成长工作台 ❤️';
         }
         if (db.baby.birthDate) {
             document.getElementById('babyAge').textContent = Utils.calcAge(db.baby.birthDate);
@@ -192,7 +192,7 @@ const App = {
 
     // ===== 首页仪表盘 =====
     renderDashboard() {
-        document.getElementById('greeting').textContent = Utils.getGreeting();
+        document.getElementById('greeting').textContent = Utils.getGreeting() + '，安崽妈咪';
         const today = new Date();
         const weeks = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
         document.getElementById('todayDate').textContent =
@@ -574,7 +574,8 @@ const App = {
                 <div class="record-detail">
                     ${r.duration ? '<strong>时长：</strong>' + r.duration + '分钟<br>' : ''}
                     ${r.content ? '<strong>内容：</strong>' + this.escape(r.content) + '<br>' : ''}
-                    ${r.reaction ? '<strong>宝宝反应：</strong>' + this.escape(r.reaction) : ''}
+                    ${r.reaction ? '<strong>宝宝反应：</strong>' + this.escape(r.reaction) + '<br>' : ''}
+                    ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
                 <div class="record-actions">
                     <button class="record-edit" onclick="App.editRecord('story','${r.id}')">✏️</button>
@@ -818,7 +819,7 @@ const App = {
                 <div class="milestone-icon">${iconMap[r.milestoneType] || '⭐'}</div>
                 <div class="milestone-info">
                     <div class="milestone-title">${this.escape(r.title || '里程碑')}</div>
-                    <div class="milestone-date">${Utils.formatDateFull(r.date)} · ${Utils.calcAge(Storage.load().baby.birthDate && Utils.daysDiff(Storage.load().baby.birthDate, r.date) >= 0 ? Storage.load().baby.birthDate : r.date)}</div>
+                    <div class="milestone-date">${Utils.formatDateFull(r.date)} · ${Utils.calcAgeAt(Storage.load().baby.birthDate, r.date)}</div>
                     ${r.note ? '<div class="milestone-note">' + this.escape(r.note) + '</div>' : ''}
                 </div>
                 <div class="record-actions">
@@ -1541,7 +1542,7 @@ const App = {
             </div>
             <div class="form-group">
                 <label class="form-label">睡眠质量</label>
-                <div class="form-chips" id="sleepQualityChips">
+                <div class="form-chips" id="sleepQualityChips" data-multi="true">
                     <div class="form-chip" data-value="很好">😊 很好</div>
                     <div class="form-chip active" data-value="一般">😐 一般</div>
                     <div class="form-chip" data-value="不安">😰 不安</div>
@@ -1560,7 +1561,7 @@ const App = {
                 time: document.getElementById('sleepTime').value,
                 sleepType: document.querySelector('#sleepTypeChips .active')?.dataset.value,
                 duration: this.val('sleepDuration'),
-                quality: document.querySelector('#sleepQualityChips .active')?.dataset.value,
+                quality: this.getMultiChipValues('sleepQualityChips'),
                 note: this.val('sleepNote')
             });
             this.renderDaily();
@@ -1586,7 +1587,7 @@ const App = {
             </div>
             <div class="form-group">
                 <label class="form-label">活动类型</label>
-                <div class="form-chips" id="outActivityChips">
+                <div class="form-chips" id="outActivityChips" data-multi="true">
                     <div class="form-chip active" data-value="散步">🚶 散步</div>
                     <div class="form-chip" data-value="晒太阳">☀️ 晒太阳</div>
                     <div class="form-chip" data-value="公园">🌳 公园</div>
@@ -1629,7 +1630,7 @@ const App = {
             Storage.add('outdoor', {
                 date: document.getElementById('outDate').value,
                 time: document.getElementById('outTime').value,
-                activity: document.querySelector('#outActivityChips .active')?.dataset.value,
+                activity: this.getMultiChipValues('outActivityChips'),
                 duration: this.val('outDuration'),
                 location: this.val('outLocation'),
                 weather: document.getElementById('outWeather').value,
@@ -1674,7 +1675,7 @@ const App = {
             </div>
             <div class="form-group">
                 <label class="form-label">宝宝反应</label>
-                <div class="form-chips" id="storyReactionChips">
+                <div class="form-chips" id="storyReactionChips" data-multi="true">
                     <div class="form-chip active" data-value="很喜欢">🥰 很喜欢</div>
                     <div class="form-chip" data-value="一般">😐 一般</div>
                     <div class="form-chip" data-value="不感兴趣">😐 不感兴趣</div>
@@ -1694,7 +1695,7 @@ const App = {
                 bookName: this.val('storyName'),
                 duration: this.val('storyDuration'),
                 content: this.val('storyContent'),
-                reaction: document.querySelector('#storyReactionChips .active')?.dataset.value,
+                reaction: this.getMultiChipValues('storyReactionChips'),
                 note: this.val('storyNote')
             });
             this.renderDaily();
@@ -1719,7 +1720,7 @@ const App = {
             </div>
             <div class="form-group">
                 <label class="form-label">尿布状态</label>
-                <div class="form-chips" id="diaTypeChips">
+                <div class="form-chips" id="diaTypeChips" data-multi="true">
                     <div class="form-chip active" data-value="wet">💧 湿</div>
                     <div class="form-chip" data-value="dirty">💩 脏</div>
                     <div class="form-chip" data-value="both">💧💩 都有</div>
@@ -1934,7 +1935,7 @@ const App = {
             </div>
             <div class="form-group">
                 <label class="form-label">今天的心情</label>
-                <div class="form-chips" id="diaryMoodChips">
+                <div class="form-chips" id="diaryMoodChips" data-multi="true">
                     <div class="form-chip active" data-value="happy">😊 开心</div>
                     <div class="form-chip" data-value="excited">🤩 兴奋</div>
                     <div class="form-chip" data-value="calm">😌 平静</div>
@@ -1955,7 +1956,7 @@ const App = {
             Storage.add('diary', {
                 date: document.getElementById('diaryDate').value,
                 time: document.getElementById('diaryTime').value,
-                mood: document.querySelector('#diaryMoodChips .active')?.dataset.value,
+                mood: this.getMultiChipValues('diaryMoodChips'),
                 content
             });
             this.renderDiary();
@@ -1980,13 +1981,27 @@ const App = {
     bindChips(containerId, callback) {
         const container = document.getElementById(containerId);
         if (!container) return;
+        // 检查是否多选模式：容器上有 data-multi 属性
+        const isMulti = container.dataset.multi === 'true';
         container.querySelectorAll('.form-chip').forEach(chip => {
             chip.addEventListener('click', () => {
-                container.querySelectorAll('.form-chip').forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
+                if (isMulti) {
+                    chip.classList.toggle('active');
+                } else {
+                    container.querySelectorAll('.form-chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                }
                 if (callback) callback(chip.dataset.value, chip);
             });
         });
+    },
+
+    // 获取多选 chips 的值（用逗号分隔）
+    getMultiChipValues(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return '';
+        return Array.from(container.querySelectorAll('.form-chip.active'))
+            .map(c => c.dataset.value).join(',');
     },
 
     counter(id, delta) {
