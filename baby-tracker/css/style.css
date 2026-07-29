@@ -7,12 +7,12 @@
 }
 
 :root {
-    --primary: #FFB7C5;
-    --primary-light: #FFD6DE;
-    --primary-dark: #F598A8;
-    --secondary: #FFE4E8;
-    --accent: #FFC1CC;
-    --bg: #FFF5F7;
+    --primary: #D4A0A7;
+    --primary-light: #E8CCD0;
+    --primary-dark: #C48B93;
+    --secondary: #F0E0E3;
+    --accent: #D4A0A7;
+    --bg: #FBF6F7;
     --card-bg: #FFFFFF;
     --text: #3D3D3D;
     --text-light: #888888;
@@ -708,23 +708,38 @@ input, textarea, select {
     margin-left: 100px;
 }
 
-/* 左侧和顶部连体半透明容器 */
+/* ===== 左侧+顶部连体半透明背景 ===== */
 .sidebar-nav {
     position: fixed;
     left: 0;
     top: 0;
     bottom: 0;
     width: 280px;
-    background: rgba(255, 183, 197, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: transparent;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px 0 12px;
     z-index: 100;
     border-radius: 0 28px 28px 0;
-    box-shadow: 4px 0 30px rgba(255, 150, 170, 0.15);
+}
+
+/* 侧边栏实际背景色块 - 向右延伸覆盖header */
+.sidebar-nav::before {
+    content: '';
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(212, 160, 167, 0.78);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 0 28px 28px 0;
+    z-index: -1;
+    box-shadow: 4px 0 30px rgba(180, 130, 140, 0.15);
+    mask-image: linear-gradient(to right, black 280px, transparent 380px);
+    -webkit-mask-image: linear-gradient(to right, black 280px, transparent 380px);
 }
 
 .sidebar-header {
