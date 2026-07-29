@@ -148,6 +148,11 @@ const App = {
             tab.addEventListener('click', () => this.switchPushTab(tab.dataset.ptab));
         });
 
+        // 成长tab切换
+        document.querySelectorAll('.growth-tab').forEach(tab => {
+            tab.addEventListener('click', () => this.switchGrowthTab(tab.dataset.gtab));
+        });
+
         // 日期切换
         document.getElementById('prevDay').addEventListener('click', () => this.changeDay(-1));
         document.getElementById('nextDay').addEventListener('click', () => this.changeDay(1));
@@ -1126,7 +1131,51 @@ const App = {
                 <div class="shopping-total-value">¥${totalAll.toFixed(2)}</div>
                 <div class="shopping-total-desc">共 ${records.length} 件物品</div>
             </div>
+            <canvas id="shoppingCatChart" width="300" height="180" style="width:100%;max-width:100%;margin-top:12px;border-radius:12px;background:#fff"></canvas>
         `;
+
+        // 绘制分类统计柱状图
+        setTimeout(() => {
+            const canvas = document.getElementById('shoppingCatChart');
+            if (!canvas) return;
+            const catTotals = {};
+            records.forEach(r => {
+                if (!r.price) return;
+                const cats = (r.category || '其他').split(',');
+                cats.forEach(c => {
+                    const cat = c.trim();
+                    if (!catTotals[cat]) catTotals[cat] = 0;
+                    catTotals[cat] += parseFloat(r.price) || 0;
+                });
+            });
+            const entries = Object.entries(catTotals).sort((a,b) => b[1] - a[1]);
+            if (entries.length === 0) return;
+
+            const dpr = window.devicePixelRatio || 1;
+            const W = canvas.parentElement.clientWidth - 16;
+            const H = 160;
+            canvas.style.width = W + 'px';
+            canvas.style.height = H + 'px';
+            canvas.width = W * dpr;
+            canvas.height = H * dpr;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+
+            const colors = ['#E891A6','#F5A623','#5B9BD5','#5CB85C','#9B7EC4','#36B5B0','#F0AD4E'];
+            const barW = Math.min(40, (W - 40) / entries.length - 8);
+            const maxVal = Math.max(...entries.map(e => e[1]));
+            entries.forEach(([cat, val], i) => {
+                const x = 20 + i * (barW + 8);
+                const barH = (val / maxVal) * (H - 40);
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.fillRect(x, H - 20 - barH, barW, barH);
+                ctx.fillStyle = '#666';
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('¥'+val.toFixed(0), x + barW/2, H - 24 - barH);
+                ctx.fillText(cat, x + barW/2, H - 4);
+            });
+        }, 150);
 
         container.innerHTML = Object.entries(groups).map(([month, group]) => {
             const [y, m] = month.split('-');
@@ -1277,6 +1326,81 @@ const App = {
         this.renderGrowthList();
         this.renderMilestone();
         this.renderMotor();
+        this.renderGrowthTimeline();
+    },
+
+    switchGrowthTab(tab) {
+        document.querySelectorAll('.growth-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.growth-section').forEach(c => c.classList.remove('active'));
+        const tabBtn = document.querySelector(`.growth-tab[data-gtab="${tab}"]`);
+        if (tabBtn) tabBtn.classList.add('active');
+        const content = document.getElementById(`gtab-${tab}`);
+        if (content) content.classList.add('active');
+    },
+
+    // 成长时间轴
+    renderGrowthTimeline() {
+        const db = Storage.load();
+        const container = document.getElementById('growthTimelineList');
+        if (!container) return;
+
+        const items = [];
+
+        // 身高体重
+        (db.growth || []).forEach(r => {
+            items.push({
+                date: r.date,
+                icon: '📏',
+                title: '身高体重记录',
+                detail: `身高 ${r.height || '-'}cm · 体重 ${r.weight || '-'}kg${r.headCircumference ? ' · 头围 ' + r.headCircumference + 'cm' : ''}`,
+                type: 'growth'
+            });
+        });
+
+        // 里程碑
+        (db.milestone || []).forEach(r => {
+            const icons = { smile:'😊', laugh:'😂', rollover:'🔄', sit:'💺', crawl:'🐣', stand:'🧍', walk:'🚶', talk:'💬', teeth:'🦷', other:'⭐' };
+            items.push({
+                date: r.date,
+                icon: icons[r.milestoneType] || '⭐',
+                title: r.title || '发育里程碑',
+                detail: r.note || '',
+                type: 'milestone'
+            });
+        });
+
+        // 运动
+        (db.motor || []).forEach(r => {
+            items.push({
+                date: r.date,
+                icon: '🏃',
+                title: r.skill || '运动发展',
+                detail: `${r.level || ''}${r.note ? ' · ' + r.note : ''}`,
+                type: 'motor'
+            });
+        });
+
+        items.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        if (items.length === 0) {
+            container.innerHTML = '<div class="empty-state">记录身高体重、里程碑和运动后，这里会自动生成成长时间轴</div>';
+            return;
+        }
+
+        container.innerHTML = items.map((item, i) => `
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                ${i < items.length - 1 ? '<div class="timeline-line"></div>' : ''}
+                <div class="timeline-card">
+                    <div class="timeline-card-date">${Utils.formatDateFull(item.date)}</div>
+                    <div class="timeline-card-body">
+                        <span style="font-size:20px">${item.icon}</span>
+                        <strong>${this.escape(item.title)}</strong>
+                        <div style="color:#888;font-size:12px;margin-top:2px">${this.escape(item.detail)}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
     },
 
     renderGrowthStats() {

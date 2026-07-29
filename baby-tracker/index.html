@@ -236,9 +236,16 @@
             <section class="page" id="page-growth">
                 <div class="section-title">成长发育</div>
 
+                <!-- 成长子标签 -->
+                <div class="growth-nav">
+                    <button class="growth-tab active" data-gtab="growth">📏 身高体重</button>
+                    <button class="growth-tab" data-gtab="milestone">⭐ 里程碑</button>
+                    <button class="growth-tab" data-gtab="motor">🏃 运动</button>
+                    <button class="growth-tab" data-gtab="timeline">🕐 时间轴</button>
+                </div>
+
                 <!-- 身高体重 -->
-                <div class="growth-section">
-                    <div class="growth-section-title">📏 身高体重</div>
+                <div class="growth-section active" id="gtab-growth">
                     <button class="add-btn" data-add="growth">+ 记录身高体重</button>
                     <div class="growth-stats" id="growthStats"></div>
                     <div class="chart-container">
@@ -248,17 +255,20 @@
                 </div>
 
                 <!-- 发育里程碑 -->
-                <div class="growth-section">
-                    <div class="growth-section-title">⭐ 发育里程碑</div>
+                <div class="growth-section" id="gtab-milestone">
                     <button class="add-btn" data-add="milestone">+ 记录里程碑</button>
                     <div class="milestone-list" id="milestoneList"></div>
                 </div>
 
                 <!-- 运动发展 -->
-                <div class="growth-section">
-                    <div class="growth-section-title">🏃 运动发展</div>
+                <div class="growth-section" id="gtab-motor">
                     <button class="add-btn" data-add="motor">+ 记录运动发展</button>
                     <div class="record-list" id="motorList"></div>
+                </div>
+
+                <!-- 成长时间轴 -->
+                <div class="growth-section" id="gtab-timeline">
+                    <div class="timeline-list" id="growthTimelineList"></div>
                 </div>
             </section>
 
