@@ -5524,12 +5524,21 @@ const App = {
                 return;
             }
 
-            el.innerHTML = items.map(item => `
+            el.innerHTML = items.map(item => {
+                const sourceColor = {
+                    'WHO': '#2196F3',
+                    '中国卫健委': '#E53935',
+                    'AAP': '#4CAF50',
+                    '崔玉涛': '#FF9800'
+                };
+                const color = sourceColor[item.source] || '#999';
+
+                return `
                 <div class="push-card">
                     <div class="push-card-header">
                         <span class="push-card-icon">${catIcons[cat] || ''}</span>
                         <span class="push-card-title">${this.escape(item.title)}</span>
-                        <span class="push-card-source">${this.escape(item.source || '')}</span>
+                        <span class="push-card-source" style="background:${color}15;color:${color};border:1px solid ${color}30">📚 ${this.escape(item.source || '')}</span>
                     </div>
                     <div class="push-card-content">${this.escape(item.content)}</div>
                     ${item.tags && item.tags.length > 0 ? `
@@ -5538,8 +5547,19 @@ const App = {
                         </div>
                     ` : ''}
                 </div>
-            `).join('');
+            `}).join('');
         });
+
+        // 免责声明
+        const pushPage = document.getElementById('page-dailyPush');
+        let note = pushPage.querySelector('.push-disclaimer');
+        if (!note) {
+            note = document.createElement('div');
+            note.className = 'push-disclaimer';
+            note.style.cssText = 'text-align:center;padding:20px 10px;font-size:11px;color:var(--text-lighter);line-height:1.6';
+            note.innerHTML = '以上内容参考 WHO、中国卫健委、AAP 等权威来源<br>仅供参考，具体请遵医嘱';
+            pushPage.appendChild(note);
+        }
     },
 
     escape(str) {
