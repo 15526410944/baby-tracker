@@ -243,11 +243,11 @@ const Utils = {
     // 获取问候语
     getGreeting() {
         const hour = new Date().getHours();
-        if (hour < 6) return '夜安 🌙';
+        if (hour < 6) return '夜安 ✨';
         if (hour < 11) return '早安 ☀️';
-        if (hour < 14) return '中午好 🌤️';
-        if (hour < 18) return '下午好 🌅';
-        if (hour < 22) return '晚上好 🌙';
+        if (hour < 14) return '中午好 ☁️';
+        if (hour < 18) return '下午好 ☁️';
+        if (hour < 22) return '晚上好 ⭐';
         return '夜深了 💤';
     },
 

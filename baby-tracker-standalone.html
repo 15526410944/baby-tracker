@@ -190,10 +190,12 @@ input, textarea, select {
 
 /* ===== 首页 ===== */
 .dashboard-greeting {
-    font-size: 24px;
-    font-weight: 700;
+    font-size: 26px;
+    font-weight: 600;
     color: var(--text);
     margin-bottom: 4px;
+    font-family: 'Comic Sans MS', 'Chalkboard SE', 'PingFang SC', cursive, sans-serif;
+    letter-spacing: 1px;
 }
 
 .dashboard-date {
@@ -1334,9 +1336,15 @@ input, textarea, select {
                     <button class="daily-tab active" data-dtab="feeding">🍼 喂养</button>
                     <button class="daily-tab" data-dtab="sleep">😴 睡眠</button>
                     <button class="daily-tab" data-dtab="outdoor">🌳 户外</button>
+                    <button class="daily-tab" data-dtab="exercise">🤸 运动</button>
                     <button class="daily-tab" data-dtab="story">📖 故事</button>
                     <button class="daily-tab" data-dtab="diaper">🧷 尿布</button>
                     <button class="daily-tab" data-dtab="bath">🛁 洗澡</button>
+                </div>
+
+                <div class="daily-content" id="dtab-exercise">
+                    <button class="add-btn" data-dadd="exercise">+ 记录运动</button>
+                    <div class="record-list" id="exerciseList"></div>
                 </div>
 
                 <div class="daily-content active" id="dtab-feeding">
@@ -1668,11 +1676,11 @@ const Utils = {
     // 获取问候语
     getGreeting() {
         const hour = new Date().getHours();
-        if (hour < 6) return '夜安 🌙';
+        if (hour < 6) return '夜安 ✨';
         if (hour < 11) return '早安 ☀️';
-        if (hour < 14) return '中午好 🌤️';
-        if (hour < 18) return '下午好 🌅';
-        if (hour < 22) return '晚上好 🌙';
+        if (hour < 14) return '中午好 ☁️';
+        if (hour < 18) return '下午好 ☁️';
+        if (hour < 22) return '晚上好 ⭐';
         return '夜深了 💤';
     },
 
@@ -2153,6 +2161,7 @@ const App = {
         this.renderFeeding();
         this.renderSleep();
         this.renderOutdoor();
+        this.renderExercise();
         this.renderStory();
         this.renderDiaper();
         this.renderBath();
@@ -2327,6 +2336,31 @@ const App = {
                 <div class="record-actions">
                     <button class="record-edit" onclick="App.editRecord('bath','${r.id}')">✏️</button>
                     <button class="record-delete" onclick="App.deleteRecord('bath','${r.id}')">🗑</button>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    renderExercise() {
+        const records = Storage.getByDate('exercise', this.currentDate);
+        const container = document.getElementById('exerciseList');
+        if (records.length === 0) {
+            container.innerHTML = '<div class="empty-state">暂无运动记录</div>';
+            return;
+        }
+        container.innerHTML = records.map(r => `
+            <div class="record-card" data-type="exercise">
+                <div class="record-card-header">
+                    <div class="record-title">🤸 ${this.escape(r.exerciseType || '运动')}</div>
+                    <div class="record-date">${r.time || ''}</div>
+                </div>
+                <div class="record-detail">
+                    ${r.duration ? '<strong>时长：</strong>' + r.duration + '分钟<br>' : ''}
+                    ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
+                </div>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('exercise','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('exercise','${r.id}')">🗑</button>
                 </div>
             </div>
         `).join('');
@@ -2888,6 +2922,7 @@ const App = {
             feeding: () => this.formFeeding(),
             sleep: () => this.formSleep(),
             outdoor: () => this.formOutdoor(),
+            exercise: () => this.formExercise(),
             story: () => this.formStory(),
             diaper: () => this.formDiaper(),
             bath: () => this.formBath()
@@ -3482,6 +3517,60 @@ const App = {
             this.renderDashboard();
             this.toast('洗澡记录已添加');
         });
+    },
+
+    formExercise() {
+        const body = `
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">日期</label>
+                    <input type="date" class="form-input" id="exDate" value="${this.currentDate}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">时间</label>
+                    <input type="time" class="form-input" id="exTime" value="${Utils.nowTime()}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">运动项目</label>
+                <div class="form-chips" id="exTypeChips" data-multi="true">
+                    <div class="form-chip active" data-value="趴卧">👶 趴卧练习</div>
+                    <div class="form-chip" data-value="翻身">🤸 翻身练习</div>
+                    <div class="form-chip" data-value="爬行">👣 爬行</div>
+                    <div class="form-chip" data-value="被动操">💪 被动操</div>
+                    <div class="form-chip" data-value="游泳">🏊 游泳</div>
+                    <div class="form-chip" data-value="抓握">✋ 抓握练习</div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">时长（分钟）</label>
+                    <div class="form-counter">
+                        <button class="counter-btn" onclick="App.counter('exDuration',-5)">−</button>
+                        <input type="number" class="counter-value" id="exDuration" value="10" style="text-align:center;border:none;font-size:20px;font-weight:700;width:80px">
+                        <button class="counter-btn" onclick="App.counter('exDuration',5)">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">备注</label>
+                <textarea class="form-textarea" id="exNote" placeholder="如：宝宝状态、进步情况等"></textarea>
+            </div>
+        `;
+
+        this.showModal('记录运动', body, () => {
+            Storage.add('exercise', {
+                date: document.getElementById('exDate').value,
+                time: document.getElementById('exTime').value,
+                exerciseType: this.getMultiChipValues('exTypeChips'),
+                duration: this.val('exDuration'),
+                note: this.val('exNote')
+            });
+            this.renderDaily();
+            this.renderDashboard();
+            this.toast('运动记录已添加');
+        });
+        this.bindChips('exTypeChips');
     },
 
     formGrowth() {

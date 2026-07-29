@@ -177,10 +177,12 @@ input, textarea, select {
 
 /* ===== 首页 ===== */
 .dashboard-greeting {
-    font-size: 24px;
-    font-weight: 700;
+    font-size: 26px;
+    font-weight: 600;
     color: var(--text);
     margin-bottom: 4px;
+    font-family: 'Comic Sans MS', 'Chalkboard SE', 'PingFang SC', cursive, sans-serif;
+    letter-spacing: 1px;
 }
 
 .dashboard-date {
