@@ -83,11 +83,11 @@ input, textarea, select {
     top: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 182, 193, 0.35) 0%, rgba(255, 154, 174, 0.35) 100%);
+    background: linear-gradient(135deg, rgba(255, 182, 193, 0.2) 0%, rgba(255, 154, 174, 0.2) 100%);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     z-index: -1;
-    border-radius: 0 0 16px 16px;
+    border-radius: 0;
 }
 
 .header-content {
@@ -848,7 +848,7 @@ input, textarea, select {
     top: 0;
     bottom: 0;
     width: 64px;
-    background: rgba(255, 182, 193, 0.35);
+    background: rgba(255, 182, 193, 0.2);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     display: flex;
