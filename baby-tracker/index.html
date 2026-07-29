@@ -47,6 +47,10 @@
                     <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                     <span class="nav-label">日记</span>
                 </button>
+                <button class="nav-btn" data-page="dailyPush" title="推送">
+                    <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="6" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span class="nav-label">推送</span>
+                </button>
             </div>
             <div class="sidebar-footer">
                 <button class="nav-btn" id="sidebarSettings" title="设置">
@@ -68,7 +72,7 @@
             <main class="app-main" id="mainContent">
             <!-- 首页仪表盘 -->
             <section class="page page-dashboard active" id="page-dashboard">
-                <!-- 居中宝宝头像 -->
+                <!-- 宝宝头像和信息 -->
                 <div class="dash-avatar-section">
                     <div class="dash-avatar-ring">
                         <div class="dash-avatar" id="dashAvatar" title="点击更换头像">👶</div>
@@ -78,67 +82,49 @@
                     <div class="dash-greeting" id="greeting">早安 👋</div>
                 </div>
 
-                <!-- 今日概览大卡片 -->
-                <div class="dash-overview-card">
-                    <div class="dash-overview-header">
-                        <div class="dash-overview-title">今日概览</div>
-                        <div class="dash-overview-date" id="todayDate"></div>
+                <!-- 本周数据卡片 -->
+                <div class="dash-data-row" id="dashDataRow">
+                    <div class="dash-data-card">
+                        <div class="dash-data-icon">🌳</div>
+                        <div class="dash-data-value" id="weekOutdoor">0h</div>
+                        <div class="dash-data-label">本周户外</div>
                     </div>
-                    <div class="dash-overview-stats">
-                        <div class="dash-stat" data-nav="feeding">
-                            <div class="dash-stat-icon">🍼</div>
-                            <div class="dash-stat-value" id="todayFeeding">0次</div>
-                            <div class="dash-stat-label">喂养</div>
-                        </div>
-                        <div class="dash-stat" data-nav="sleep">
-                            <div class="dash-stat-icon">😴</div>
-                            <div class="dash-stat-value" id="todaySleep">0h</div>
-                            <div class="dash-stat-label">睡眠</div>
-                        </div>
-                        <div class="dash-stat" data-nav="diaper">
-                            <div class="dash-stat-icon">🧷</div>
-                            <div class="dash-stat-value" id="todayOutdoor">0次</div>
-                            <div class="dash-stat-label">尿布</div>
-                        </div>
-                        <div class="dash-stat" data-nav="bath">
-                            <div class="dash-stat-icon">🛁</div>
-                            <div class="dash-stat-value" id="todayStory">0次</div>
-                            <div class="dash-stat-label">洗澡</div>
+                    <div class="dash-data-card">
+                        <div class="dash-data-icon">📖</div>
+                        <div class="dash-data-value" id="weekStory">0本</div>
+                        <div class="dash-data-label">本周绘本</div>
+                    </div>
+                    <div class="dash-data-card">
+                        <div class="dash-data-icon">💰</div>
+                        <div class="dash-data-value" id="monthShopping">¥0</div>
+                        <div class="dash-data-label">本月花费</div>
+                    </div>
+                </div>
+
+                <!-- 每日推送精选 -->
+                <div class="dash-push-card" id="dashPushCard">
+                    <div class="dash-push-header">
+                        <div class="dash-push-title">📡 今日育儿小贴士</div>
+                        <span class="dash-push-age" id="dashPushAge"></span>
+                    </div>
+                    <div class="dash-push-list" id="dashPushList">
+                        <div class="dash-push-item">
+                            <span class="dash-push-dot"></span>
+                            <div class="dash-push-text">加载中...</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 今日待办 -->
-                <div class="dash-todo-card">
-                    <div class="dash-todo-header">
-                        <div class="dash-todo-title">今日待办</div>
-                        <div class="dash-todo-count" id="todoCount">0/4</div>
-                    </div>
-                    <div class="dash-todo-list" id="todoList">
-                        <label class="dash-todo-item">
-                            <input type="checkbox" data-todo="feeding">
-                            <span class="todo-check"></span>
-                            <span class="todo-text">记录今日喂养</span>
-                        </label>
-                        <label class="dash-todo-item">
-                            <input type="checkbox" data-todo="sleep">
-                            <span class="todo-check"></span>
-                            <span class="todo-text">记录今日睡眠</span>
-                        </label>
-                        <label class="dash-todo-item">
-                            <input type="checkbox" data-todo="diaper">
-                            <span class="todo-check"></span>
-                            <span class="todo-text">记录今日尿布</span>
-                        </label>
-                        <label class="dash-todo-item">
-                            <input type="checkbox" data-todo="bath">
-                            <span class="todo-check"></span>
-                            <span class="todo-text">记录今日洗澡</span>
-                        </label>
-                    </div>
+                <!-- 今日时间线 -->
+                <div class="dash-timeline-header">
+                    <div class="dash-timeline-title">今日时间线</div>
+                    <button class="dash-timeline-clear" id="clearTodayTimeline">清空</button>
+                </div>
+                <div class="timeline" id="todayTimeline">
+                    <div class="empty-state">还没有记录，点击下方按钮开始吧</div>
                 </div>
 
-                <!-- 快捷记录 -->
+                <!-- 底部快捷操作 -->
                 <div class="dash-quick-actions">
                     <button class="dash-quick-btn" data-action="quick-feed">
                         <span class="dash-quick-icon">🍼</span>
@@ -160,15 +146,6 @@
                         <span class="dash-quick-icon">📝</span>
                         <span>日记</span>
                     </button>
-                </div>
-
-                <!-- 今日时间线 -->
-                <div class="dash-timeline-header">
-                    <div class="dash-timeline-title">今日时间线</div>
-                    <button class="dash-timeline-clear" id="clearTodayTimeline">清空</button>
-                </div>
-                <div class="timeline" id="todayTimeline">
-                    <div class="empty-state">还没有记录，点击上方按钮开始吧</div>
                 </div>
             </section>
 
@@ -276,6 +253,26 @@
                 <div class="section-title">成长日记</div>
                 <button class="add-btn" data-add="diary">+ 写新日记</button>
                 <div class="diary-list" id="diaryList"></div>
+            </section>
+
+            <!-- 每日推送页面 -->
+            <section class="page" id="page-dailyPush">
+                <div class="section-title">每日推送</div>
+                <div class="push-age-badge" id="pushAgeBadge">安安 · 5个月</div>
+                <div class="push-nav">
+                    <button class="push-tab active" data-ptab="feeding">🍽️ 饮食</button>
+                    <button class="push-tab" data-ptab="education">🧩 早教</button>
+                    <button class="push-tab" data-ptab="development">📈 发育</button>
+                    <button class="push-tab" data-ptab="sleep">💤 睡眠</button>
+                    <button class="push-tab" data-ptab="health">🩺 健康</button>
+                    <button class="push-tab" data-ptab="care">👶 护理</button>
+                </div>
+                <div class="push-content active" id="ptab-feeding"></div>
+                <div class="push-content" id="ptab-education"></div>
+                <div class="push-content" id="ptab-development"></div>
+                <div class="push-content" id="ptab-sleep"></div>
+                <div class="push-content" id="ptab-health"></div>
+                <div class="push-content" id="ptab-care"></div>
             </section>
 
             <!-- 早教页面 -->

@@ -104,6 +104,11 @@ const App = {
             tab.addEventListener('click', () => this.switchEarlyTab(tab.dataset.etab));
         });
 
+        // 推送tab切换
+        document.querySelectorAll('.push-tab').forEach(tab => {
+            tab.addEventListener('click', () => this.switchPushTab(tab.dataset.ptab));
+        });
+
         // 日期切换
         document.getElementById('prevDay').addEventListener('click', () => this.changeDay(-1));
         document.getElementById('nextDay').addEventListener('click', () => this.changeDay(1));
@@ -160,6 +165,7 @@ const App = {
         if (pageName === 'shopping') this.renderShopping();
         if (pageName === 'growth') this.renderGrowth();
         if (pageName === 'diary') this.renderDiary();
+        if (pageName === 'dailyPush') this.renderDailyPush();
     },
 
     // ===== 检查宝宝信息 =====
@@ -242,41 +248,102 @@ const App = {
     // ===== 首页仪表盘 =====
     renderDashboard() {
         document.getElementById('greeting').textContent = Utils.getGreeting() + ' 👋';
-        const today = new Date();
-        const weeks = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-        document.getElementById('todayDate').textContent =
-            `${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日 ${weeks[today.getDay()]}`;
 
-        // 今日概览
-        const feedings = Storage.getToday('feeding');
-        const sleeps = Storage.getToday('sleep');
-        const diapers = Storage.getToday('diaper');
-        const baths = Storage.getToday('bath');
+        // 本周数据
+        this.renderWeekData();
 
-        document.getElementById('todayFeeding').textContent = `${feedings.length}次`;
-        let sleepMins = 0;
-        sleeps.forEach(s => {
-            if (s.duration) sleepMins += parseInt(s.duration) || 0;
-        });
-        document.getElementById('todaySleep').textContent = sleepMins > 0 ?
-            `${(sleepMins/60).toFixed(1)}h` : '0h';
-        document.getElementById('todayOutdoor').textContent = `${diapers.length}次`;
-        document.getElementById('todayStory').textContent = `${baths.length}次`;
-
-        // 今日待办 - 根据已有记录更新勾选状态
-        const todoChecks = document.querySelectorAll('.dash-todo-item input[type="checkbox"]');
-        todoChecks.forEach(cb => {
-            const type = cb.dataset.todo;
-            const records = Storage.getToday(type);
-            cb.checked = records.length > 0;
-        });
-        this.updateTodoCount();
+        // 每日推送精选
+        this.renderDashPush();
 
         // 今日时间线
         this.renderTimeline();
     },
 
-    // 更新待办计数
+    // 本周数据统计
+    renderWeekData() {
+        const db = Storage.load();
+        const today = new Date();
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - today.getDay());
+        const weekStartStr = Utils.dateStr(weekStart);
+
+        // 本周户外时长
+        let outdoorMins = 0;
+        (db.outdoor || []).forEach(o => {
+            if (o.date >= weekStartStr && o.duration) outdoorMins += parseInt(o.duration) || 0;
+        });
+        document.getElementById('weekOutdoor').textContent =
+            outdoorMins >= 60 ? `${(outdoorMins/60).toFixed(1)}h` : `${outdoorMins}min`;
+
+        // 本周绘本数
+        let storyCount = 0;
+        (db.story || []).forEach(s => {
+            if (s.date >= weekStartStr) storyCount++;
+        });
+        document.getElementById('weekStory').textContent = `${storyCount}本`;
+
+        // 本月购物花费
+        const monthStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+        let monthTotal = 0;
+        (db.shopping || []).forEach(s => {
+            if (s.date && s.date.startsWith(monthStr) && s.price) {
+                monthTotal += parseFloat(s.price) || 0;
+            }
+        });
+        document.getElementById('monthShopping').textContent = `¥${monthTotal}`;
+    },
+
+    // 首页推送精选
+    renderDashPush() {
+        const db = Storage.load();
+        const ageBadge = document.getElementById('dashPushAge');
+        const pushList = document.getElementById('dashPushList');
+
+        if (!db.baby.birthDate) {
+            pushList.innerHTML = '<div class="dash-push-item"><span class="dash-push-dot"></span><div class="dash-push-text">请先设置宝宝信息</div></div>';
+            return;
+        }
+
+        const months = Math.floor((new Date() - new Date(db.baby.birthDate)) / (1000*60*60*24*30.44));
+        const ageText = months > 0 ? `${months}个月` : '新生儿';
+        if (ageBadge) ageBadge.textContent = `安安 · ${ageText}`;
+
+        if (typeof PushData === 'undefined') {
+            pushList.innerHTML = '<div class="dash-push-item"><span class="dash-push-dot"></span><div class="dash-push-text">推送内容加载中...</div></div>';
+            return;
+        }
+
+        const pushes = PushData.getByMonth(months);
+        const items = [];
+        const keys = Object.keys(pushes);
+        // 从每个分类取第一条
+        keys.forEach(k => {
+            if (pushes[k] && pushes[k].length > 0) {
+                items.push({ cat: k, ...pushes[k][0] });
+            }
+        });
+
+        if (items.length === 0) {
+            pushList.innerHTML = '<div class="dash-push-item"><span class="dash-push-dot"></span><div class="dash-push-text">暂无推送</div></div>';
+            return;
+        }
+
+        // 随机取3条
+        const selected = items.sort(() => Math.random() - 0.5).slice(0, 3);
+        const catIcons = { feeding: '🍽️', education: '🧩', development: '📈', sleep: '💤', health: '🩺', care: '👶' };
+
+        pushList.innerHTML = selected.map(item => `
+            <div class="dash-push-item">
+                <span class="dash-push-dot"></span>
+                <div class="dash-push-text">
+                    ${item.title}
+                    <span class="dash-push-tag">${catIcons[item.cat] || ''}</span>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    // 更新待办计数 (保留兼容)
     updateTodoCount() {
         const todoChecks = document.querySelectorAll('.dash-todo-item input[type="checkbox"]');
         let done = 0;
@@ -2650,6 +2717,70 @@ const App = {
         // 隐藏取消按钮，只显示关闭
         document.getElementById('modalCancel').style.display = 'none';
         document.getElementById('modalConfirm').textContent = '知道了';
+    },
+
+    // ===== 每日推送 =====
+    switchPushTab(tab) {
+        document.querySelectorAll('.push-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.push-content').forEach(c => c.classList.remove('active'));
+        document.querySelector(`.push-tab[data-ptab="${tab}"]`).classList.add('active');
+        const content = document.getElementById(`ptab-${tab}`);
+        if (content) content.classList.add('active');
+    },
+
+    renderDailyPush() {
+        const db = Storage.load();
+        if (!db.baby.birthDate) {
+            ['feeding','education','development','sleep','health','care'].forEach(tab => {
+                const el = document.getElementById(`ptab-${tab}`);
+                if (el) el.innerHTML = '<div class="empty-state">请先设置宝宝信息</div>';
+            });
+            return;
+        }
+
+        const months = Math.floor((new Date() - new Date(db.baby.birthDate)) / (1000*60*60*24*30.44));
+        const ageText = months > 0 ? `${months}个月` : '新生儿';
+        const ageBadge = document.getElementById('pushAgeBadge');
+        if (ageBadge) ageBadge.textContent = `安安 · ${ageText}`;
+
+        if (typeof PushData === 'undefined') return;
+
+        const pushes = PushData.getByMonth(months);
+        const catIcons = { feeding: '🍽️', education: '🧩', development: '📈', sleep: '💤', health: '🩺', care: '👶' };
+
+        Object.keys(pushes).forEach(cat => {
+            const items = pushes[cat] || [];
+            const el = document.getElementById(`ptab-${cat}`);
+            if (!el) return;
+
+            if (items.length === 0) {
+                el.innerHTML = '<div class="empty-state">暂无推送内容</div>';
+                return;
+            }
+
+            el.innerHTML = items.map(item => `
+                <div class="push-card">
+                    <div class="push-card-header">
+                        <span class="push-card-icon">${catIcons[cat] || ''}</span>
+                        <span class="push-card-title">${this.escape(item.title)}</span>
+                        <span class="push-card-source">${this.escape(item.source || '')}</span>
+                    </div>
+                    <div class="push-card-content">${this.escape(item.content)}</div>
+                    ${item.tags && item.tags.length > 0 ? `
+                        <div class="push-card-tags">
+                            ${item.tags.map(t => `<span class="push-card-tag">${this.escape(t)}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        });
+    },
+
+    escape(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
     }
 };
 

@@ -1551,13 +1551,211 @@ input, textarea, select {
     font-size: 14px;
 }
 
-/* ===== 侧边栏按钮间距调整（7个按钮） ===== */
+/* ===== 侧边栏按钮间距调整（8个按钮） ===== */
 .sidebar-menu {
-    gap: 8px;
+    gap: 6px;
 }
 
 /* ===== 童趣字体增强 ===== */
 .section-title, .nav-label, .dash-baby-name, .dash-greeting,
 .header-logo, .modal-title, .record-title, .shopping-month-title {
     letter-spacing: 0.5px;
+}
+
+/* ===== 首页新版 ===== */
+.dash-data-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.dash-data-card {
+    flex: 1;
+    background: var(--card-bg);
+    border-radius: 14px;
+    padding: 12px 8px;
+    text-align: center;
+    box-shadow: var(--shadow);
+}
+
+.dash-data-icon {
+    font-size: 22px;
+    margin-bottom: 4px;
+}
+
+.dash-data-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.dash-data-label {
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: 2px;
+}
+
+/* 每日推送卡片 */
+.dash-push-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+}
+
+.dash-push-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.dash-push-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.dash-push-age {
+    font-size: 11px;
+    color: var(--primary);
+    background: var(--secondary);
+    padding: 3px 10px;
+    border-radius: 10px;
+}
+
+.dash-push-item {
+    display: flex;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+}
+.dash-push-item:last-child { border-bottom: none; }
+
+.dash-push-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+    margin-top: 6px;
+    flex-shrink: 0;
+}
+
+.dash-push-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+    flex: 1;
+}
+
+.dash-push-tag {
+    display: inline-block;
+    font-size: 10px;
+    color: var(--text-lighter);
+    background: var(--secondary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 4px;
+}
+
+/* ===== 每日推送页面 ===== */
+.push-age-badge {
+    text-align: center;
+    font-size: 13px;
+    color: var(--primary);
+    font-weight: 600;
+    padding: 4px 0 12px;
+}
+
+.push-nav {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 0 0 12px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex-wrap: wrap;
+}
+.push-nav::-webkit-scrollbar { display: none; }
+
+.push-tab {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-light);
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.push-tab.active {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: var(--shadow-hover);
+}
+
+.push-content {
+    display: none;
+}
+.push-content.active {
+    display: block;
+}
+
+.push-card {
+    background: var(--card-bg);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow);
+}
+
+.push-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.push-card-icon {
+    font-size: 20px;
+}
+
+.push-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    flex: 1;
+}
+
+.push-card-source {
+    font-size: 10px;
+    color: var(--text-lighter);
+    background: var(--secondary);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.push-card-content {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+}
+
+.push-card-tags {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.push-card-tag {
+    font-size: 10px;
+    color: var(--primary);
+    background: var(--secondary);
+    padding: 2px 8px;
+    border-radius: 10px;
 }
