@@ -323,11 +323,9 @@ input, textarea, select {
 /* ===== 健康档案 ===== */
 .health-nav, .daily-nav {
     display: flex;
-    gap: 8px;
+    flex-direction: column;
+    gap: 6px;
     margin-bottom: 16px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
     padding-bottom: 4px;
 }
 
@@ -337,14 +335,15 @@ input, textarea, select {
 
 .health-tab, .daily-tab {
     white-space: nowrap;
-    padding: 8px 14px;
-    border-radius: 20px;
+    padding: 10px 14px;
+    border-radius: 12px;
     background: var(--card-bg);
     font-size: 13px;
     font-weight: 500;
     color: var(--text-light);
     box-shadow: var(--shadow);
     transition: all 0.2s;
+    text-align: left;
 }
 
 .health-tab.active, .daily-tab.active {
