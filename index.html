@@ -4067,7 +4067,7 @@ const App = {
             <div class="record-card" data-type="story">
                 <div class="record-card-header">
                     <div class="record-title">📖 ${this.escape(r.bookName || '绘本')}</div>
-                    <div class="record-date">${r.date || ''} ${r.time || ''}</div>
+                    <div class="record-date" style="font-size:11px;color:#aaa;white-space:nowrap">${r.date || ''}</div>
                 </div>
                 <div class="record-detail">
                     ${r.duration ? '<strong>时长：</strong>' + r.duration + '分钟<br>' : ''}
