@@ -3997,7 +3997,7 @@ const App = {
     },
 
     renderEarlyOutdoor() {
-        const records = Storage.getByDate('outdoor', Utils.todayStr());
+        const records = Storage.getAll('outdoor').sort((a, b) => new Date(b.date) - new Date(a.date));
         const container = document.getElementById('earlyOutdoorList');
         if (records.length === 0) {
             container.innerHTML = '<div class="empty-state">暂无户外活动记录</div>';
@@ -4008,14 +4008,14 @@ const App = {
         const goal = Storage.load().settings.outdoorGoal;
         container.innerHTML = `
             <div class="growth-stat-card" style="margin-bottom:12px">
-                <div class="growth-stat-label">今日户外总时长 (目标${goal}min)</div>
+                <div class="growth-stat-label">累计户外总时长 (目标${goal}min/天)</div>
                 <div class="growth-stat-value">${totalMins}<span class="growth-stat-unit"> 分钟</span></div>
             </div>
         ` + records.map(r => `
             <div class="record-card" data-type="outdoor">
                 <div class="record-card-header">
                     <div class="record-title">🌳 ${this.escape(r.activity || '户外活动')}</div>
-                    <div class="record-date">${r.time || ''}</div>
+                    <div class="record-date" style="font-size:11px;color:#aaa;white-space:nowrap">${r.date || ''}</div>
                 </div>
                 <div class="record-detail">
                     <strong>时长：</strong>${r.duration || 0}分钟<br>
@@ -4032,7 +4032,7 @@ const App = {
     },
 
     renderEarlyExercise() {
-        const records = Storage.getByDate('exercise', Utils.todayStr());
+        const records = Storage.getAll('exercise').sort((a, b) => new Date(b.date) - new Date(a.date));
         const container = document.getElementById('earlyExerciseList');
         if (records.length === 0) {
             container.innerHTML = '<div class="empty-state">暂无运动记录</div>';
@@ -4042,7 +4042,7 @@ const App = {
             <div class="record-card" data-type="exercise">
                 <div class="record-card-header">
                     <div class="record-title">🤸 ${this.escape(r.exerciseType || '运动')}</div>
-                    <div class="record-date">${r.time || ''}</div>
+                    <div class="record-date" style="font-size:11px;color:#aaa;white-space:nowrap">${r.date || ''}</div>
                 </div>
                 <div class="record-detail">
                     ${r.duration ? '<strong>时长：</strong>' + r.duration + '分钟<br>' : ''}
