@@ -4057,7 +4057,7 @@ const App = {
     },
 
     renderEarlyStory() {
-        const records = Storage.getByDate('story', Utils.todayStr());
+        const records = Storage.getAll('story').sort((a, b) => new Date(b.date) - new Date(a.date));
         const container = document.getElementById('earlyStoryList');
         if (records.length === 0) {
             container.innerHTML = '<div class="empty-state">暂无绘本记录</div>';
@@ -4067,7 +4067,7 @@ const App = {
             <div class="record-card" data-type="story">
                 <div class="record-card-header">
                     <div class="record-title">📖 ${this.escape(r.bookName || '绘本')}</div>
-                    <div class="record-date">${r.time || ''}</div>
+                    <div class="record-date">${r.date || ''} ${r.time || ''}</div>
                 </div>
                 <div class="record-detail">
                     ${r.duration ? '<strong>时长：</strong>' + r.duration + '分钟<br>' : ''}
