@@ -1388,6 +1388,166 @@ input, textarea, select {
     align-items: center;
     justify-content: center;
 }
+
+/* ===== 早教页面 ===== */
+.early-nav {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 4px 0 12px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.early-nav::-webkit-scrollbar { display: none; }
+
+.early-tab {
+    flex-shrink: 0;
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-light);
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.early-tab.active {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: var(--shadow-hover);
+}
+
+.early-content {
+    display: none;
+}
+.early-content.active {
+    display: block;
+}
+
+/* ===== 购物页面 ===== */
+.shopping-summary {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+}
+
+.shopping-summary-item {
+    flex: 1;
+}
+.shopping-summary-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary);
+}
+.shopping-summary-label {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 4px;
+}
+
+.shopping-month-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+}
+
+.shopping-month-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+}
+
+.shopping-month-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.shopping-month-total {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.shopping-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+}
+.shopping-item:last-child { border-bottom: none; }
+
+.shopping-item-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.shopping-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.shopping-item-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.shopping-item-meta {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 2px;
+}
+
+.shopping-item-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.shopping-item-rating {
+    color: #F5A623;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.shopping-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-lighter);
+    font-size: 14px;
+}
+
+/* ===== 侧边栏按钮间距调整（7个按钮） ===== */
+.sidebar-menu {
+    gap: 8px;
+}
+
+/* ===== 童趣字体增强 ===== */
+.section-title, .nav-label, .dash-baby-name, .dash-greeting,
+.header-logo, .modal-title, .record-title, .shopping-month-title {
+    letter-spacing: 0.5px;
+}
 </style>
     <title>宝宝成长记</title>
 </head>
