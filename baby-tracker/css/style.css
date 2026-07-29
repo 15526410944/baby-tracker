@@ -7,12 +7,12 @@
 }
 
 :root {
-    --primary: #D4A0A7;
-    --primary-light: #E8CCD0;
-    --primary-dark: #C48B93;
-    --secondary: #F0E0E3;
-    --accent: #D4A0A7;
-    --bg: #FBF6F7;
+    --primary: #FF8FA3;
+    --primary-light: #FFD0DC;
+    --primary-dark: #E5738A;
+    --secondary: #FFE4E8;
+    --accent: #FFB7B2;
+    --bg: #FFF5F7;
     --card-bg: #FFFFFF;
     --text: #3D3D3D;
     --text-light: #888888;
@@ -68,26 +68,26 @@ input, textarea, select {
 /* ===== 顶部状态栏 ===== */
 .app-header {
     flex-shrink: 0;
-    background: rgba(212, 160, 167, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: transparent;
     padding: var(--safe-top) 16px 12px;
     padding-top: calc(var(--safe-top) + 12px);
-    box-shadow: 0 2px 10px rgba(180, 130, 140, 0.15);
+    box-shadow: none;
     z-index: 10;
     position: relative;
-    border-radius: 0 0 20px 20px;
     margin-left: 80px;
 }
 
-/* 顶部和左侧的连体半透明容器 */
-.app-header::before,
-.sidebar-nav {
+/* 顶部和左侧连体背景 */
+.app-header::before {
     content: '';
-}
-
-.header-bg {
-    display: none;
+    position: absolute;
+    left: -80px;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    z-index: -1;
+    border-radius: 0 0 20px 0;
 }
 
 .header-content {
@@ -719,15 +719,15 @@ input, textarea, select {
     top: 0;
     bottom: 0;
     width: 80px;
-    background: rgba(212, 160, 167, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px 0 12px;
     z-index: 100;
     border-radius: 0 20px 20px 0;
+    box-shadow: 2px 0 12px rgba(255, 143, 163, 0.2);
+}
     box-shadow: 2px 0 12px rgba(180, 130, 140, 0.15);
 }
 
