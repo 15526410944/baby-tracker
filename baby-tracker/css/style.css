@@ -865,7 +865,7 @@ input, textarea, select {
     align-items: center;
     justify-content: center;
     gap: 2px;
-    color: rgba(255,255,255,0.5);
+    color: #999;
     transition: all 0.2s;
     padding: 6px;
     border-radius: 12px;
