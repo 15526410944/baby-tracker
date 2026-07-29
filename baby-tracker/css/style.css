@@ -873,14 +873,17 @@ input, textarea, select {
 
 .nav-btn {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 2px;
     color: rgba(255,255,255,0.5);
     transition: all 0.2s;
-    padding: 8px;
+    padding: 6px;
     border-radius: 12px;
-    width: 44px;
-    height: 44px;
+    width: 52px;
+    height: auto;
+    min-height: 44px;
 }
 
 .nav-btn.active {
@@ -893,8 +896,15 @@ input, textarea, select {
 }
 
 .nav-svg {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
+}
+
+.nav-label {
+    font-size: 9px;
+    font-weight: 500;
+    color: inherit;
+    line-height: 1;
 }
 
 /* ===== 模态框 ===== */
