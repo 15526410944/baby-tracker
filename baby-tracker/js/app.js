@@ -34,7 +34,10 @@ const App = {
         const handleAvatarClick = () => {
             if (fileInput) fileInput.click();
         };
-        document.getElementById('babyAvatar').addEventListener('click', handleAvatarClick);
+        const dashAvatar = document.getElementById('dashAvatar');
+        if (dashAvatar) dashAvatar.addEventListener('click', handleAvatarClick);
+        const babyAvatar = document.getElementById('babyAvatar');
+        if (babyAvatar) babyAvatar.addEventListener('click', handleAvatarClick);
         const sidebarAvatar = document.getElementById('sidebarAvatar');
         if (sidebarAvatar) sidebarAvatar.addEventListener('click', handleAvatarClick);
 
@@ -59,26 +62,32 @@ const App = {
             });
         }
 
-        // 概览卡片跳转
-        document.querySelectorAll('.overview-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const nav = card.dataset.nav;
+        // 概览卡片跳转 - 新样式
+        document.querySelectorAll('.dash-stat').forEach(stat => {
+            stat.addEventListener('click', () => {
+                const nav = stat.dataset.nav;
                 this.switchPage('daily');
-                // 切换到对应tab
                 setTimeout(() => this.switchDailyTab(nav), 100);
             });
         });
 
         // 快捷操作
-        document.querySelectorAll('.quick-btn').forEach(btn => {
+        document.querySelectorAll('.dash-quick-btn').forEach(btn => {
             btn.addEventListener('click', () => this.handleQuickAction(btn.dataset.action));
         });
 
         // 清空今日时间线
         document.getElementById('clearTodayTimeline').addEventListener('click', () => this.clearTodayTimeline());
 
-        // 宝宝信息
-        document.getElementById('babyInfo').addEventListener('click', () => this.showBabyInfoForm());
+        // 宝宝信息 - 点击仪表盘头像区域
+        const dashAvatarSection = document.querySelector('.dash-avatar-section');
+        if (dashAvatarSection) {
+            dashAvatarSection.addEventListener('click', (e) => {
+                if (e.target !== document.getElementById('dashAvatar')) {
+                    this.showBabyInfoForm();
+                }
+            });
+        }
 
         // 健康档案tab切换
         document.querySelectorAll('.health-tab').forEach(tab => {
@@ -118,6 +127,11 @@ const App = {
             this.deferredPrompt = e;
             this.showInstallBanner();
         });
+
+        // 今日待办复选框
+        document.querySelectorAll('.dash-todo-item input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', () => this.updateTodoCount());
+        });
     },
 
     // ===== 页面切换 =====
@@ -155,16 +169,32 @@ const App = {
         const avatar = db.baby.avatar || '👶';
         const isPhoto = avatar.startsWith('data:image/');
 
-        // 顶部头像
+        // 仪表盘中央头像
+        const dashAvatar = document.getElementById('dashAvatar');
+        if (dashAvatar) {
+            if (isPhoto) {
+                dashAvatar.textContent = '';
+                dashAvatar.style.backgroundImage = `url(${avatar})`;
+                dashAvatar.style.backgroundSize = 'cover';
+                dashAvatar.style.backgroundPosition = 'center';
+            } else {
+                dashAvatar.style.backgroundImage = '';
+                dashAvatar.textContent = avatar;
+            }
+        }
+
+        // 顶部头像 (保留兼容)
         const babyAvatar = document.getElementById('babyAvatar');
-        if (isPhoto) {
-            babyAvatar.textContent = '';
-            babyAvatar.style.backgroundImage = `url(${avatar})`;
-            babyAvatar.style.backgroundSize = 'cover';
-            babyAvatar.style.backgroundPosition = 'center';
-        } else {
-            babyAvatar.style.backgroundImage = '';
-            babyAvatar.textContent = avatar;
+        if (babyAvatar) {
+            if (isPhoto) {
+                babyAvatar.textContent = '';
+                babyAvatar.style.backgroundImage = `url(${avatar})`;
+                babyAvatar.style.backgroundSize = 'cover';
+                babyAvatar.style.backgroundPosition = 'center';
+            } else {
+                babyAvatar.style.backgroundImage = '';
+                babyAvatar.textContent = avatar;
+            }
         }
 
         // 侧边栏头像
@@ -180,19 +210,26 @@ const App = {
                 sidebarAvatar.textContent = avatar;
             }
         }
+
+        // 仪表盘名字和年龄
+        const dashBabyName = document.getElementById('dashBabyName');
+        const dashBabyAge = document.getElementById('dashBabyAge');
         if (db.baby.name) {
-            document.getElementById('babyName').textContent = db.baby.name;
+            if (dashBabyName) dashBabyName.textContent = db.baby.name;
+            document.getElementById('babyName') && (document.getElementById('babyName').textContent = db.baby.name);
             const sidebarName = document.getElementById('sidebarName');
             if (sidebarName) sidebarName.textContent = db.baby.name + '成长工作台 ❤️';
         }
         if (db.baby.birthDate) {
-            document.getElementById('babyAge').textContent = Utils.calcAge(db.baby.birthDate);
+            const age = Utils.calcAge(db.baby.birthDate);
+            if (dashBabyAge) dashBabyAge.textContent = age;
+            document.getElementById('babyAge') && (document.getElementById('babyAge').textContent = age);
         }
     },
 
     // ===== 首页仪表盘 =====
     renderDashboard() {
-        document.getElementById('greeting').textContent = Utils.getGreeting() + '，安崽妈咪';
+        document.getElementById('greeting').textContent = Utils.getGreeting() + ' 👋';
         const today = new Date();
         const weeks = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
         document.getElementById('todayDate').textContent =
@@ -205,14 +242,12 @@ const App = {
         const stories = Storage.getToday('story');
 
         document.getElementById('todayFeeding').textContent = `${feedings.length}次`;
-        // 睡眠总时长
         let sleepMins = 0;
         sleeps.forEach(s => {
             if (s.duration) sleepMins += parseInt(s.duration) || 0;
         });
         document.getElementById('todaySleep').textContent = sleepMins > 0 ?
             `${(sleepMins/60).toFixed(1)}h` : '0h';
-        // 户外总时长
         let outdoorMins = 0;
         outdoors.forEach(o => {
             if (o.duration) outdoorMins += parseInt(o.duration) || 0;
@@ -220,8 +255,26 @@ const App = {
         document.getElementById('todayOutdoor').textContent = `${outdoorMins}min`;
         document.getElementById('todayStory').textContent = `${stories.length}次`;
 
+        // 今日待办 - 根据已有记录更新勾选状态
+        const todoChecks = document.querySelectorAll('.dash-todo-item input[type="checkbox"]');
+        todoChecks.forEach(cb => {
+            const type = cb.dataset.todo;
+            const records = Storage.getToday(type);
+            cb.checked = records.length > 0;
+        });
+        this.updateTodoCount();
+
         // 今日时间线
         this.renderTimeline();
+    },
+
+    // 更新待办计数
+    updateTodoCount() {
+        const todoChecks = document.querySelectorAll('.dash-todo-item input[type="checkbox"]');
+        let done = 0;
+        todoChecks.forEach(cb => { if (cb.checked) done++; });
+        const countEl = document.getElementById('todoCount');
+        if (countEl) countEl.textContent = `${done}/${todoChecks.length}`;
     },
 
     renderTimeline() {

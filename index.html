@@ -82,89 +82,36 @@ input, textarea, select {
 .app-header {
     flex-shrink: 0;
     background: transparent;
-    padding: var(--safe-top) 16px 12px;
-    padding-top: calc(var(--safe-top) + 12px);
-    box-shadow: none;
+    padding: var(--safe-top) 16px 10px;
+    padding-top: calc(var(--safe-top) + 10px);
     z-index: 10;
     position: relative;
-    margin-left: 80px;
+    margin-left: 64px;
 }
 
-/* 顶部和左侧连体背景 */
 .app-header::before {
     content: '';
     position: absolute;
-    left: -80px;
+    left: -64px;
     top: 0;
     right: 0;
     bottom: 0;
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     z-index: -1;
-    border-radius: 0 0 20px 0;
+    border-radius: 0 0 16px 0;
 }
 
 .header-content {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
 }
 
-.baby-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-}
-
-.baby-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
-    border: 2px solid rgba(255,255,255,0.5);
-    cursor: pointer;
-    overflow: hidden;
-    transition: transform 0.15s;
-    background-size: cover;
-    background-position: center;
-}
-.baby-avatar:active {
-    transform: scale(0.93);
-}
-
-.baby-details {
+.header-logo {
     color: #fff;
-}
-
-.baby-name {
-    font-size: 17px;
-    font-weight: 600;
-    margin-bottom: 2px;
-}
-
-.baby-age {
-    font-size: 12px;
-    opacity: 0.9;
-}
-
-.header-settings {
-    color: #fff;
-    font-size: 24px;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: background 0.2s;
-}
-
-.header-settings:active {
-    background: rgba(255,255,255,0.2);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
 }
 
 /* ===== 主内容区 ===== */
@@ -192,102 +139,280 @@ input, textarea, select {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== 首页 ===== */
-.dashboard-greeting {
-    font-size: 26px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 4px;
-    font-family: 'Comic Sans MS', 'Chalkboard SE', 'PingFang SC', cursive, sans-serif;
-    letter-spacing: 1px;
-}
-
-.dashboard-date {
-    font-size: 13px;
-    color: var(--text-light);
-    margin-bottom: 20px;
-}
-
-.overview-cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 24px;
-}
-
-.overview-card {
-    background: var(--card-bg);
-    border-radius: var(--radius);
-    padding: 16px;
-    box-shadow: var(--shadow);
+/* ===== 首页仪表盘 ===== */
+.dash-avatar-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    transition: transform 0.15s, box-shadow 0.15s;
+    padding: 8px 0 20px;
+}
+
+.dash-avatar-ring {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    padding: 3px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 16px rgba(255, 143, 163, 0.3);
+}
+
+.dash-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
     cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.15s;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid #fff;
 }
 
-.overview-card:active {
-    transform: scale(0.96);
-    box-shadow: var(--shadow-hover);
+.dash-avatar:active {
+    transform: scale(0.93);
 }
 
-.overview-icon {
-    font-size: 32px;
-    margin-bottom: 4px;
+.dash-baby-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
 }
 
-.overview-label {
+.dash-baby-age {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-bottom: 8px;
+}
+
+.dash-greeting {
+    font-size: 14px;
+    color: var(--primary-dark);
+    font-weight: 500;
+}
+
+/* 今日概览大卡片 */
+.dash-overview-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+}
+
+.dash-overview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.dash-overview-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.dash-overview-date {
     font-size: 12px;
     color: var(--text-light);
 }
 
-.overview-value {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--primary-dark);
+.dash-overview-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 8px;
 }
 
-.section-title {
+.dash-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 4px;
+    border-radius: 14px;
+    background: #FFF5F7;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.2s;
+}
+
+.dash-stat:active {
+    transform: scale(0.95);
+    background: #FFE4EC;
+}
+
+.dash-stat-icon {
+    font-size: 22px;
+    margin-bottom: 4px;
+}
+
+.dash-stat-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 2px;
+}
+
+.dash-stat-label {
+    font-size: 11px;
+    color: var(--text-light);
+}
+
+/* 今日待办 */
+.dash-todo-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+}
+
+.dash-todo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.dash-todo-title {
     font-size: 17px;
     font-weight: 700;
     color: var(--text);
-    margin-bottom: 12px;
-    margin-top: 8px;
+}
+
+.dash-todo-count {
+    font-size: 12px;
+    color: var(--primary-dark);
+    font-weight: 600;
+    background: #FFF5F7;
+    padding: 4px 10px;
+    border-radius: 10px;
+}
+
+.dash-todo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dash-todo-item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    background: #FAFAFA;
 }
 
-.section-action {
-    font-size: 13px;
-    font-weight: 400;
-    color: var(--primary);
+.dash-todo-item:hover {
+    background: #FFF5F7;
 }
 
-.quick-actions {
+.dash-todo-item input[type="checkbox"] {
+    display: none;
+}
+
+.todo-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #DDD;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.dash-todo-item input[type="checkbox"]:checked + .todo-check {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.dash-todo-item input[type="checkbox"]:checked + .todo-check::after {
+    content: '✓';
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.todo-text {
+    font-size: 14px;
+    color: var(--text);
+    flex: 1;
+}
+
+.dash-todo-item input[type="checkbox"]:checked ~ .todo-text {
+    color: var(--text-lighter);
+    text-decoration: line-through;
+}
+
+/* 快捷操作 */
+.dash-quick-actions {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 10px;
-    margin-bottom: 24px;
+    margin-bottom: 18px;
 }
 
-.quick-btn {
+.dash-quick-btn {
     background: var(--card-bg);
-    border-radius: var(--radius-sm);
-    padding: 14px 8px;
+    border-radius: 14px;
+    padding: 12px 8px;
     font-size: 12px;
     font-weight: 600;
     color: var(--text);
     box-shadow: var(--shadow);
     transition: transform 0.15s, box-shadow 0.15s;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
 }
 
-.quick-btn:active {
+.dash-quick-btn:active {
     transform: scale(0.95);
     box-shadow: var(--shadow-hover);
+}
+
+.dash-quick-icon {
+    font-size: 22px;
+}
+
+/* 时间线标题 */
+.dash-timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.dash-timeline-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.dash-timeline-clear {
+    font-size: 12px;
+    color: var(--primary-dark);
+    padding: 4px 12px;
+    border-radius: 12px;
+    background: #FFF5F7;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.dash-timeline-clear:active {
+    background: #FFE4EC;
 }
 
 /* ===== 时间线 ===== */
@@ -722,65 +847,23 @@ input, textarea, select {
     flex-direction: column;
     min-width: 0;
     overflow: hidden;
-    margin-left: 80px;
+    margin-left: 64px;
 }
 
-/* ===== 左侧边栏导航 ===== */
+/* ===== 左侧边栏导航 - 极简图标风格 ===== */
 .sidebar-nav {
     position: fixed;
     left: 0;
     top: 0;
     bottom: 0;
-    width: 80px;
+    width: 64px;
     background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px 0 12px;
+    padding: 16px 0 12px;
     z-index: 100;
-    border-radius: 0 20px 20px 0;
-    box-shadow: 2px 0 12px rgba(255, 143, 163, 0.2);
-}
     box-shadow: 2px 0 12px rgba(180, 130, 140, 0.15);
-}
-
-.sidebar-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.3);
-    width: 60px;
-}
-
-.sidebar-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    border: 2px solid rgba(255,255,255,0.5);
-    margin-bottom: 6px;
-    cursor: pointer;
-    overflow: hidden;
-    transition: transform 0.15s;
-    background-size: cover;
-    background-position: center;
-}
-.sidebar-avatar:active {
-    transform: scale(0.93);
-}
-
-.sidebar-name {
-    font-size: 12px;
-    color: #fff;
-    font-weight: 600;
-    text-align: left;
-    line-height: 1.4;
 }
 
 .sidebar-menu {
@@ -788,43 +871,43 @@ input, textarea, select {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     width: 100%;
+    padding-top: 20px;
 }
 
 .sidebar-footer {
     padding-top: 12px;
-    border-top: 1px solid rgba(255,255,255,0.3);
-    width: 60px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    width: 40px;
     display: flex;
     justify-content: center;
 }
 
 .nav-btn {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    color: rgba(255,255,255,0.6);
+    color: rgba(255,255,255,0.5);
     transition: all 0.2s;
-    padding: 10px 4px;
+    padding: 8px;
     border-radius: 12px;
-    width: 64px;
+    width: 44px;
+    height: 44px;
 }
 
 .nav-btn.active {
     color: #fff;
-    background: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.25);
 }
 
-.nav-icon {
-    font-size: 22px;
+.nav-btn:active {
+    background: rgba(255,255,255,0.15);
 }
 
-.nav-label {
-    font-size: 10px;
-    font-weight: 500;
+.nav-svg {
+    width: 22px;
+    height: 22px;
 }
 
 /* ===== 模态框 ===== */
@@ -1187,102 +1270,146 @@ input, textarea, select {
 </head>
 <body>
     <div id="app">
-        <!-- 左侧边栏导航 -->
+        <!-- 左侧边栏导航 - 极简图标风格 -->
         <nav class="sidebar-nav">
-            <div class="sidebar-header">
-                <div class="sidebar-avatar" id="sidebarAvatar" title="点击更换头像"></div>
-                <div class="sidebar-name" id="sidebarName">宝宝成长记</div>
-            </div>
             <div class="sidebar-menu">
-                <button class="nav-btn active" data-page="dashboard">
-                    <span class="nav-icon">🏠</span>
-                    <span class="nav-label">首页</span>
+                <button class="nav-btn active" data-page="dashboard" title="首页">
+                    <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 </button>
-                <button class="nav-btn" data-page="health">
-                    <span class="nav-icon">🏥</span>
-                    <span class="nav-label">健康</span>
+                <button class="nav-btn" data-page="health" title="健康">
+                    <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                 </button>
-                <button class="nav-btn" data-page="daily">
-                    <span class="nav-icon">📅</span>
-                    <span class="nav-label">日常</span>
+                <button class="nav-btn" data-page="daily" title="日常">
+                    <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </button>
-                <button class="nav-btn" data-page="growth">
-                    <span class="nav-icon">📈</span>
-                    <span class="nav-label">成长</span>
+                <button class="nav-btn" data-page="growth" title="成长">
+                    <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
                 </button>
-                <button class="nav-btn" data-page="diary">
-                    <span class="nav-icon">📔</span>
-                    <span class="nav-label">日记</span>
+                <button class="nav-btn" data-page="diary" title="日记">
+                    <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                 </button>
             </div>
             <div class="sidebar-footer">
-                <button class="nav-btn" id="sidebarSettings">
-                    <span class="nav-icon">️</span>
-                    <span class="nav-label">设置</span>
+                <button class="nav-btn" id="sidebarSettings" title="设置">
+                    <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                 </button>
             </div>
         </nav>
 
         <!-- 主内容区 -->
         <div class="main-wrapper">
-            <!-- 顶部状态栏 -->
+            <!-- 顶部状态栏 - 极简设计 -->
             <header class="app-header">
                 <div class="header-content">
-                    <div class="baby-info" id="babyInfo">
-                        <div class="baby-avatar" id="babyAvatar" title="点击更换头像">👶</div>
-                        <div class="baby-details">
-                            <div class="baby-name" id="babyName">点击设置宝宝信息</div>
-                            <div class="baby-age" id="babyAge">设置出生日期</div>
-                        </div>
-                    </div>
+                    <div class="header-logo">宝宝成长记</div>
                 </div>
             </header>
 
             <main class="app-main" id="mainContent">
             <!-- 首页仪表盘 -->
             <section class="page page-dashboard active" id="page-dashboard">
-                <div class="dashboard-greeting" id="greeting">早安 👋</div>
-                <div class="dashboard-date" id="todayDate"></div>
+                <!-- 居中宝宝头像 -->
+                <div class="dash-avatar-section">
+                    <div class="dash-avatar-ring">
+                        <div class="dash-avatar" id="dashAvatar" title="点击更换头像">👶</div>
+                    </div>
+                    <div class="dash-baby-name" id="dashBabyName">宝宝</div>
+                    <div class="dash-baby-age" id="dashBabyAge">0个月</div>
+                    <div class="dash-greeting" id="greeting">早安 👋</div>
+                </div>
 
-                <!-- 今日概览卡片 -->
-                <div class="overview-cards">
-                    <div class="overview-card" data-nav="feeding">
-                        <div class="overview-icon">🍼</div>
-                        <div class="overview-label">今日喂养</div>
-                        <div class="overview-value" id="todayFeeding">0次</div>
+                <!-- 今日概览大卡片 -->
+                <div class="dash-overview-card">
+                    <div class="dash-overview-header">
+                        <div class="dash-overview-title">今日概览</div>
+                        <div class="dash-overview-date" id="todayDate"></div>
                     </div>
-                    <div class="overview-card" data-nav="sleep">
-                        <div class="overview-icon">😴</div>
-                        <div class="overview-label">今日睡眠</div>
-                        <div class="overview-value" id="todaySleep">0h</div>
-                    </div>
-                    <div class="overview-card" data-nav="outdoor">
-                        <div class="overview-icon">🌳</div>
-                        <div class="overview-label">户外时间</div>
-                        <div class="overview-value" id="todayOutdoor">0min</div>
-                    </div>
-                    <div class="overview-card" data-nav="story">
-                        <div class="overview-icon">📖</div>
-                        <div class="overview-label">故事时间</div>
-                        <div class="overview-value" id="todayStory">0次</div>
+                    <div class="dash-overview-stats">
+                        <div class="dash-stat" data-nav="feeding">
+                            <div class="dash-stat-icon">🍼</div>
+                            <div class="dash-stat-value" id="todayFeeding">0次</div>
+                            <div class="dash-stat-label">喂养</div>
+                        </div>
+                        <div class="dash-stat" data-nav="sleep">
+                            <div class="dash-stat-icon">😴</div>
+                            <div class="dash-stat-value" id="todaySleep">0h</div>
+                            <div class="dash-stat-label">睡眠</div>
+                        </div>
+                        <div class="dash-stat" data-nav="outdoor">
+                            <div class="dash-stat-icon">🌳</div>
+                            <div class="dash-stat-value" id="todayOutdoor">0min</div>
+                            <div class="dash-stat-label">户外</div>
+                        </div>
+                        <div class="dash-stat" data-nav="story">
+                            <div class="dash-stat-icon">📖</div>
+                            <div class="dash-stat-value" id="todayStory">0次</div>
+                            <div class="dash-stat-label">故事</div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 快捷操作 -->
-                <div class="section-title">快捷记录</div>
-                <div class="quick-actions">
-                    <button class="quick-btn" data-action="quick-feed">🍼 记录喂奶</button>
-                    <button class="quick-btn" data-action="quick-sleep">😴 记录睡眠</button>
-                    <button class="quick-btn" data-action="quick-diaper">🧷 换尿布</button>
-                    <button class="quick-btn" data-action="quick-outdoor">🌳 户外活动</button>
-                    <button class="quick-btn" data-action="quick-story">📖 故事时间</button>
-                    <button class="quick-btn" data-action="quick-diary">📝 写日记</button>
+                <!-- 今日待办 -->
+                <div class="dash-todo-card">
+                    <div class="dash-todo-header">
+                        <div class="dash-todo-title">今日待办</div>
+                        <div class="dash-todo-count" id="todoCount">0/4</div>
+                    </div>
+                    <div class="dash-todo-list" id="todoList">
+                        <label class="dash-todo-item">
+                            <input type="checkbox" data-todo="feeding">
+                            <span class="todo-check"></span>
+                            <span class="todo-text">记录今日喂养</span>
+                        </label>
+                        <label class="dash-todo-item">
+                            <input type="checkbox" data-todo="sleep">
+                            <span class="todo-check"></span>
+                            <span class="todo-text">记录今日睡眠</span>
+                        </label>
+                        <label class="dash-todo-item">
+                            <input type="checkbox" data-todo="outdoor">
+                            <span class="todo-check"></span>
+                            <span class="todo-text">记录户外活动</span>
+                        </label>
+                        <label class="dash-todo-item">
+                            <input type="checkbox" data-todo="story">
+                            <span class="todo-check"></span>
+                            <span class="todo-text">记录故事时间</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 快捷记录 -->
+                <div class="dash-quick-actions">
+                    <button class="dash-quick-btn" data-action="quick-feed">
+                        <span class="dash-quick-icon">🍼</span>
+                        <span>喂奶</span>
+                    </button>
+                    <button class="dash-quick-btn" data-action="quick-sleep">
+                        <span class="dash-quick-icon">😴</span>
+                        <span>睡眠</span>
+                    </button>
+                    <button class="dash-quick-btn" data-action="quick-diaper">
+                        <span class="dash-quick-icon">🧷</span>
+                        <span>尿布</span>
+                    </button>
+                    <button class="dash-quick-btn" data-action="quick-outdoor">
+                        <span class="dash-quick-icon">🌳</span>
+                        <span>户外</span>
+                    </button>
+                    <button class="dash-quick-btn" data-action="quick-story">
+                        <span class="dash-quick-icon">📖</span>
+                        <span>故事</span>
+                    </button>
+                    <button class="dash-quick-btn" data-action="quick-diary">
+                        <span class="dash-quick-icon">📝</span>
+                        <span>日记</span>
+                    </button>
                 </div>
 
                 <!-- 今日时间线 -->
-                <div class="section-title">
-                    今日时间线
-                    <span class="section-action" id="clearTodayTimeline">清空</span>
+                <div class="dash-timeline-header">
+                    <div class="dash-timeline-title">今日时间线</div>
+                    <button class="dash-timeline-clear" id="clearTodayTimeline">清空</button>
                 </div>
                 <div class="timeline" id="todayTimeline">
                     <div class="empty-state">还没有记录，点击上方按钮开始吧</div>
@@ -1740,7 +1867,10 @@ const App = {
         const handleAvatarClick = () => {
             if (fileInput) fileInput.click();
         };
-        document.getElementById('babyAvatar').addEventListener('click', handleAvatarClick);
+        const dashAvatar = document.getElementById('dashAvatar');
+        if (dashAvatar) dashAvatar.addEventListener('click', handleAvatarClick);
+        const babyAvatar = document.getElementById('babyAvatar');
+        if (babyAvatar) babyAvatar.addEventListener('click', handleAvatarClick);
         const sidebarAvatar = document.getElementById('sidebarAvatar');
         if (sidebarAvatar) sidebarAvatar.addEventListener('click', handleAvatarClick);
 
@@ -1765,26 +1895,32 @@ const App = {
             });
         }
 
-        // 概览卡片跳转
-        document.querySelectorAll('.overview-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const nav = card.dataset.nav;
+        // 概览卡片跳转 - 新样式
+        document.querySelectorAll('.dash-stat').forEach(stat => {
+            stat.addEventListener('click', () => {
+                const nav = stat.dataset.nav;
                 this.switchPage('daily');
-                // 切换到对应tab
                 setTimeout(() => this.switchDailyTab(nav), 100);
             });
         });
 
         // 快捷操作
-        document.querySelectorAll('.quick-btn').forEach(btn => {
+        document.querySelectorAll('.dash-quick-btn').forEach(btn => {
             btn.addEventListener('click', () => this.handleQuickAction(btn.dataset.action));
         });
 
         // 清空今日时间线
         document.getElementById('clearTodayTimeline').addEventListener('click', () => this.clearTodayTimeline());
 
-        // 宝宝信息
-        document.getElementById('babyInfo').addEventListener('click', () => this.showBabyInfoForm());
+        // 宝宝信息 - 点击仪表盘头像区域
+        const dashAvatarSection = document.querySelector('.dash-avatar-section');
+        if (dashAvatarSection) {
+            dashAvatarSection.addEventListener('click', (e) => {
+                if (e.target !== document.getElementById('dashAvatar')) {
+                    this.showBabyInfoForm();
+                }
+            });
+        }
 
         // 健康档案tab切换
         document.querySelectorAll('.health-tab').forEach(tab => {
@@ -1824,6 +1960,11 @@ const App = {
             this.deferredPrompt = e;
             this.showInstallBanner();
         });
+
+        // 今日待办复选框
+        document.querySelectorAll('.dash-todo-item input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', () => this.updateTodoCount());
+        });
     },
 
     // ===== 页面切换 =====
@@ -1861,16 +2002,32 @@ const App = {
         const avatar = db.baby.avatar || '👶';
         const isPhoto = avatar.startsWith('data:image/');
 
-        // 顶部头像
+        // 仪表盘中央头像
+        const dashAvatar = document.getElementById('dashAvatar');
+        if (dashAvatar) {
+            if (isPhoto) {
+                dashAvatar.textContent = '';
+                dashAvatar.style.backgroundImage = `url(${avatar})`;
+                dashAvatar.style.backgroundSize = 'cover';
+                dashAvatar.style.backgroundPosition = 'center';
+            } else {
+                dashAvatar.style.backgroundImage = '';
+                dashAvatar.textContent = avatar;
+            }
+        }
+
+        // 顶部头像 (保留兼容)
         const babyAvatar = document.getElementById('babyAvatar');
-        if (isPhoto) {
-            babyAvatar.textContent = '';
-            babyAvatar.style.backgroundImage = `url(${avatar})`;
-            babyAvatar.style.backgroundSize = 'cover';
-            babyAvatar.style.backgroundPosition = 'center';
-        } else {
-            babyAvatar.style.backgroundImage = '';
-            babyAvatar.textContent = avatar;
+        if (babyAvatar) {
+            if (isPhoto) {
+                babyAvatar.textContent = '';
+                babyAvatar.style.backgroundImage = `url(${avatar})`;
+                babyAvatar.style.backgroundSize = 'cover';
+                babyAvatar.style.backgroundPosition = 'center';
+            } else {
+                babyAvatar.style.backgroundImage = '';
+                babyAvatar.textContent = avatar;
+            }
         }
 
         // 侧边栏头像
@@ -1886,19 +2043,26 @@ const App = {
                 sidebarAvatar.textContent = avatar;
             }
         }
+
+        // 仪表盘名字和年龄
+        const dashBabyName = document.getElementById('dashBabyName');
+        const dashBabyAge = document.getElementById('dashBabyAge');
         if (db.baby.name) {
-            document.getElementById('babyName').textContent = db.baby.name;
+            if (dashBabyName) dashBabyName.textContent = db.baby.name;
+            document.getElementById('babyName') && (document.getElementById('babyName').textContent = db.baby.name);
             const sidebarName = document.getElementById('sidebarName');
             if (sidebarName) sidebarName.textContent = db.baby.name + '成长工作台 ❤️';
         }
         if (db.baby.birthDate) {
-            document.getElementById('babyAge').textContent = Utils.calcAge(db.baby.birthDate);
+            const age = Utils.calcAge(db.baby.birthDate);
+            if (dashBabyAge) dashBabyAge.textContent = age;
+            document.getElementById('babyAge') && (document.getElementById('babyAge').textContent = age);
         }
     },
 
     // ===== 首页仪表盘 =====
     renderDashboard() {
-        document.getElementById('greeting').textContent = Utils.getGreeting() + '，安崽妈咪';
+        document.getElementById('greeting').textContent = Utils.getGreeting() + ' 👋';
         const today = new Date();
         const weeks = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
         document.getElementById('todayDate').textContent =
@@ -1911,14 +2075,12 @@ const App = {
         const stories = Storage.getToday('story');
 
         document.getElementById('todayFeeding').textContent = `${feedings.length}次`;
-        // 睡眠总时长
         let sleepMins = 0;
         sleeps.forEach(s => {
             if (s.duration) sleepMins += parseInt(s.duration) || 0;
         });
         document.getElementById('todaySleep').textContent = sleepMins > 0 ?
             `${(sleepMins/60).toFixed(1)}h` : '0h';
-        // 户外总时长
         let outdoorMins = 0;
         outdoors.forEach(o => {
             if (o.duration) outdoorMins += parseInt(o.duration) || 0;
@@ -1926,8 +2088,26 @@ const App = {
         document.getElementById('todayOutdoor').textContent = `${outdoorMins}min`;
         document.getElementById('todayStory').textContent = `${stories.length}次`;
 
+        // 今日待办 - 根据已有记录更新勾选状态
+        const todoChecks = document.querySelectorAll('.dash-todo-item input[type="checkbox"]');
+        todoChecks.forEach(cb => {
+            const type = cb.dataset.todo;
+            const records = Storage.getToday(type);
+            cb.checked = records.length > 0;
+        });
+        this.updateTodoCount();
+
         // 今日时间线
         this.renderTimeline();
+    },
+
+    // 更新待办计数
+    updateTodoCount() {
+        const todoChecks = document.querySelectorAll('.dash-todo-item input[type="checkbox"]');
+        let done = 0;
+        todoChecks.forEach(cb => { if (cb.checked) done++; });
+        const countEl = document.getElementById('todoCount');
+        if (countEl) countEl.textContent = `${done}/${todoChecks.length}`;
     },
 
     renderTimeline() {
