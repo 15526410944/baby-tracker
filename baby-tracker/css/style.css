@@ -860,6 +860,21 @@ input, textarea, select {
     border-radius: 0;
 }
 
+.sidebar-nav::after {
+    content: '';
+    position: absolute;
+    left: 64px;
+    top: 0;
+    bottom: 0;
+    width: 32px;
+    background: rgba(255, 182, 193, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 0 32px 32px 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
 .nav-btn {
     display: flex;
     flex-direction: column;
