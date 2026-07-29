@@ -99,6 +99,11 @@ const App = {
             tab.addEventListener('click', () => this.switchDailyTab(tab.dataset.dtab));
         });
 
+        // 早教tab切换
+        document.querySelectorAll('.early-tab').forEach(tab => {
+            tab.addEventListener('click', () => this.switchEarlyTab(tab.dataset.etab));
+        });
+
         // 日期切换
         document.getElementById('prevDay').addEventListener('click', () => this.changeDay(-1));
         document.getElementById('nextDay').addEventListener('click', () => this.changeDay(1));
@@ -111,6 +116,11 @@ const App = {
         // 日常记录添加按钮
         document.querySelectorAll('[data-dadd]').forEach(btn => {
             btn.addEventListener('click', () => this.showDailyAddForm(btn.dataset.dadd));
+        });
+
+        // 早教记录添加按钮
+        document.querySelectorAll('[data-eadd]').forEach(btn => {
+            btn.addEventListener('click', () => this.showEarlyAddForm(btn.dataset.eadd));
         });
 
         // 模态框
@@ -146,6 +156,8 @@ const App = {
         if (pageName === 'dashboard') this.renderDashboard();
         if (pageName === 'health') this.renderHealth();
         if (pageName === 'daily') this.renderDaily();
+        if (pageName === 'early') this.renderEarly();
+        if (pageName === 'shopping') this.renderShopping();
         if (pageName === 'growth') this.renderGrowth();
         if (pageName === 'diary') this.renderDiary();
     },
@@ -238,8 +250,8 @@ const App = {
         // 今日概览
         const feedings = Storage.getToday('feeding');
         const sleeps = Storage.getToday('sleep');
-        const outdoors = Storage.getToday('outdoor');
-        const stories = Storage.getToday('story');
+        const diapers = Storage.getToday('diaper');
+        const baths = Storage.getToday('bath');
 
         document.getElementById('todayFeeding').textContent = `${feedings.length}次`;
         let sleepMins = 0;
@@ -248,12 +260,8 @@ const App = {
         });
         document.getElementById('todaySleep').textContent = sleepMins > 0 ?
             `${(sleepMins/60).toFixed(1)}h` : '0h';
-        let outdoorMins = 0;
-        outdoors.forEach(o => {
-            if (o.duration) outdoorMins += parseInt(o.duration) || 0;
-        });
-        document.getElementById('todayOutdoor').textContent = `${outdoorMins}min`;
-        document.getElementById('todayStory').textContent = `${stories.length}次`;
+        document.getElementById('todayOutdoor').textContent = `${diapers.length}次`;
+        document.getElementById('todayStory').textContent = `${baths.length}次`;
 
         // 今日待办 - 根据已有记录更新勾选状态
         const todoChecks = document.querySelectorAll('.dash-todo-item input[type="checkbox"]');
@@ -283,7 +291,7 @@ const App = {
         const allRecords = [];
 
         // 收集今日所有记录
-        ['feeding', 'sleep', 'outdoor', 'story', 'diaper', 'bath'].forEach(type => {
+        ['feeding', 'sleep', 'diaper', 'bath'].forEach(type => {
             const records = Storage.getByDate(type, today);
             records.forEach(r => {
                 allRecords.push({ ...r, _type: type });
@@ -302,8 +310,6 @@ const App = {
         const typeMap = {
             feeding: { icon: '🍼', label: '喂奶' },
             sleep: { icon: '😴', label: '睡眠' },
-            outdoor: { icon: '🌳', label: '户外' },
-            story: { icon: '📖', label: '故事' },
             diaper: { icon: '🧷', label: '尿布' },
             bath: { icon: '🛁', label: '洗澡' }
         };
@@ -315,10 +321,6 @@ const App = {
                 detail = `${r.feedType || ''} ${r.amount || ''}${r.unit || ''}`;
             } else if (r._type === 'sleep') {
                 detail = `${r.duration || 0}分钟`;
-            } else if (r._type === 'outdoor') {
-                detail = `${r.duration || 0}分钟 ${r.activity || ''}`;
-            } else if (r._type === 'story') {
-                detail = r.bookName || r.content || '';
             } else if (r._type === 'diaper') {
                 detail = r.diaperType || '';
             } else if (r._type === 'bath') {
@@ -343,7 +345,7 @@ const App = {
         if (!confirm('确定清空今日所有日常记录吗？（健康档案不受影响）')) return;
         const today = Utils.todayStr();
         const db = Storage.load();
-        ['feeding', 'sleep', 'outdoor', 'story', 'diaper', 'bath'].forEach(type => {
+        ['feeding', 'sleep', 'diaper', 'bath'].forEach(type => {
             db[type] = db[type].filter(r => r.date !== today);
         });
         Storage.save(db);
@@ -357,8 +359,7 @@ const App = {
             'quick-feed': () => this.showDailyAddForm('feeding'),
             'quick-sleep': () => this.showDailyAddForm('sleep'),
             'quick-diaper': () => this.showDailyAddForm('diaper'),
-            'quick-outdoor': () => this.showDailyAddForm('outdoor'),
-            'quick-story': () => this.showDailyAddForm('story'),
+            'quick-bath': () => this.showDailyAddForm('bath'),
             'quick-diary': () => this.showAddForm('diary')
         };
         if (handlers[action]) handlers[action]();
@@ -508,9 +509,6 @@ const App = {
         document.getElementById('dailyDate').textContent = Utils.formatDate(this.currentDate);
         this.renderFeeding();
         this.renderSleep();
-        this.renderOutdoor();
-        this.renderExercise();
-        this.renderStory();
         this.renderDiaper();
         this.renderBath();
     },
@@ -687,6 +685,427 @@ const App = {
                 </div>
             </div>
         `).join('');
+    },
+
+    // ===== 早教启蒙 =====
+    switchEarlyTab(tab) {
+        document.querySelectorAll('.early-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.early-content').forEach(c => c.classList.remove('active'));
+        const tabBtn = document.querySelector(`.early-tab[data-etab="${tab}"]`);
+        if (tabBtn) tabBtn.classList.add('active');
+        const content = document.getElementById(`etab-${tab}`);
+        if (content) content.classList.add('active');
+    },
+
+    renderEarly() {
+        this.currentDate = Utils.todayStr();
+        this.renderEarlyOutdoor();
+        this.renderEarlyExercise();
+        this.renderEarlyStory();
+        this.renderMusic();
+        this.renderCustomEarly();
+    },
+
+    showEarlyAddForm(type) {
+        const forms = {
+            outdoor: () => this.formOutdoor(),
+            exercise: () => this.formExercise(),
+            story: () => this.formStory(),
+            music: () => this.formMusic(),
+            customEarly: () => this.formCustomEarly()
+        };
+        if (forms[type]) forms[type]();
+    },
+
+    renderEarlyOutdoor() {
+        const records = Storage.getByDate('outdoor', Utils.todayStr());
+        const container = document.getElementById('earlyOutdoorList');
+        if (records.length === 0) {
+            container.innerHTML = '<div class="empty-state">暂无户外活动记录</div>';
+            return;
+        }
+        let totalMins = 0;
+        records.forEach(r => totalMins += parseInt(r.duration) || 0);
+        const goal = Storage.load().settings.outdoorGoal;
+        container.innerHTML = `
+            <div class="growth-stat-card" style="margin-bottom:12px">
+                <div class="growth-stat-label">今日户外总时长 (目标${goal}min)</div>
+                <div class="growth-stat-value">${totalMins}<span class="growth-stat-unit"> 分钟</span></div>
+            </div>
+        ` + records.map(r => `
+            <div class="record-card" data-type="outdoor">
+                <div class="record-card-header">
+                    <div class="record-title">🌳 ${this.escape(r.activity || '户外活动')}</div>
+                    <div class="record-date">${r.time || ''}</div>
+                </div>
+                <div class="record-detail">
+                    <strong>时长：</strong>${r.duration || 0}分钟<br>
+                    ${r.location ? '<strong>地点：</strong>' + this.escape(r.location) + '<br>' : ''}
+                    ${r.weather ? '<strong>天气：</strong>' + this.escape(r.weather) + '<br>' : ''}
+                    ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
+                </div>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('outdoor','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('outdoor','${r.id}')">🗑</button>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    renderEarlyExercise() {
+        const records = Storage.getByDate('exercise', Utils.todayStr());
+        const container = document.getElementById('earlyExerciseList');
+        if (records.length === 0) {
+            container.innerHTML = '<div class="empty-state">暂无运动记录</div>';
+            return;
+        }
+        container.innerHTML = records.map(r => `
+            <div class="record-card" data-type="exercise">
+                <div class="record-card-header">
+                    <div class="record-title">🤸 ${this.escape(r.exerciseType || '运动')}</div>
+                    <div class="record-date">${r.time || ''}</div>
+                </div>
+                <div class="record-detail">
+                    ${r.duration ? '<strong>时长：</strong>' + r.duration + '分钟<br>' : ''}
+                    ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
+                </div>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('exercise','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('exercise','${r.id}')">🗑</button>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    renderEarlyStory() {
+        const records = Storage.getByDate('story', Utils.todayStr());
+        const container = document.getElementById('earlyStoryList');
+        if (records.length === 0) {
+            container.innerHTML = '<div class="empty-state">暂无绘本记录</div>';
+            return;
+        }
+        container.innerHTML = records.map(r => `
+            <div class="record-card" data-type="story">
+                <div class="record-card-header">
+                    <div class="record-title">📖 ${this.escape(r.bookName || '绘本')}</div>
+                    <div class="record-date">${r.time || ''}</div>
+                </div>
+                <div class="record-detail">
+                    ${r.duration ? '<strong>时长：</strong>' + r.duration + '分钟<br>' : ''}
+                    ${r.content ? '<strong>内容：</strong>' + this.escape(r.content) + '<br>' : ''}
+                    ${r.reaction ? '<strong>反应：</strong>' + this.escape(r.reaction) + '<br>' : ''}
+                    ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
+                </div>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('story','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('story','${r.id}')">🗑</button>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    renderMusic() {
+        const records = Storage.getAll('music').sort((a, b) => new Date(b.date) - new Date(a.date));
+        const container = document.getElementById('musicList');
+        if (records.length === 0) {
+            container.innerHTML = '<div class="empty-state">暂无音乐记录</div>';
+            return;
+        }
+        container.innerHTML = records.map(r => `
+            <div class="record-card" data-type="music">
+                <div class="record-card-header">
+                    <div class="record-title">🎵 ${this.escape(r.songName || '音乐')}</div>
+                    <div class="record-date">${Utils.formatDateFull(r.date)} ${r.time || ''}</div>
+                </div>
+                <div class="record-detail">
+                    ${r.duration ? '<strong>时长：</strong>' + r.duration + '分钟<br>' : ''}
+                    ${r.reaction ? '<strong>宝宝反应：</strong>' + this.escape(r.reaction) + '<br>' : ''}
+                    ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
+                </div>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('music','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('music','${r.id}')">🗑</button>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    renderCustomEarly() {
+        const records = Storage.getAll('customEarly').sort((a, b) => new Date(b.date) - new Date(a.date));
+        const container = document.getElementById('customEarlyList');
+        if (records.length === 0) {
+            container.innerHTML = '<div class="empty-state">点击上方按钮添加自定义早教记录</div>';
+            return;
+        }
+        container.innerHTML = records.map(r => `
+            <div class="record-card" data-type="customEarly">
+                <div class="record-card-header">
+                    <div class="record-title">✨ ${this.escape(r.title || '早教活动')}</div>
+                    <div class="record-date">${Utils.formatDateFull(r.date)} ${r.time || ''}</div>
+                </div>
+                <div class="record-detail">
+                    ${r.content ? '<strong>内容：</strong>' + this.escape(r.content) + '<br>' : ''}
+                    ${r.duration ? '<strong>时长：</strong>' + r.duration + '分钟<br>' : ''}
+                    ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
+                </div>
+                <div class="record-actions">
+                    <button class="record-edit" onclick="App.editRecord('customEarly','${r.id}')">✏️</button>
+                    <button class="record-delete" onclick="App.deleteRecord('customEarly','${r.id}')">🗑</button>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    formMusic() {
+        const body = `
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">日期</label>
+                    <input type="date" class="form-input" id="musicDate" value="${Utils.todayStr()}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">时间</label>
+                    <input type="time" class="form-input" id="musicTime" value="${Utils.nowTime()}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">歌曲/音乐名称</label>
+                <input type="text" class="form-input" id="musicSongName" placeholder="如：小星星、两只老虎">
+            </div>
+            <div class="form-group">
+                <label class="form-label">时长（分钟）</label>
+                <div class="form-counter">
+                    <button class="counter-btn" onclick="App.counter('musicDuration',-5)">−</button>
+                    <input type="number" class="counter-value" id="musicDuration" value="15" style="text-align:center;border:none;font-size:20px;font-weight:700;width:80px">
+                    <button class="counter-btn" onclick="App.counter('musicDuration',5)">+</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">宝宝反应</label>
+                <div class="form-chips" id="musicReactionChips" data-multi="true">
+                    <div class="form-chip" data-value="很喜欢">😍 很喜欢</div>
+                    <div class="form-chip" data-value="跟着哼">🎤 跟着哼</div>
+                    <div class="form-chip" data-value="手舞足蹈">💃 手舞足蹈</div>
+                    <div class="form-chip" data-value="安静听">😌 安静听</div>
+                    <div class="form-chip" data-value="没反应">😶 没反应</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">备注</label>
+                <textarea class="form-textarea" id="musicNote" placeholder="如：宝宝特别喜欢这首歌"></textarea>
+            </div>
+        `;
+
+        this.showModal('记录音乐', body, () => {
+            Storage.add('music', {
+                date: document.getElementById('musicDate').value,
+                time: document.getElementById('musicTime').value,
+                songName: this.val('musicSongName'),
+                duration: this.val('musicDuration'),
+                reaction: this.getMultiChipValues('musicReactionChips'),
+                note: this.val('musicNote')
+            });
+            this.renderEarly();
+            this.toast('音乐记录已添加');
+        });
+        this.bindChips('musicReactionChips');
+    },
+
+    formCustomEarly() {
+        const body = `
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">日期</label>
+                    <input type="date" class="form-input" id="ceDate" value="${Utils.todayStr()}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">时间</label>
+                    <input type="time" class="form-input" id="ceTime" value="${Utils.nowTime()}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">活动标题</label>
+                <input type="text" class="form-input" id="ceTitle" placeholder="如：感统训练、积木搭建">
+            </div>
+            <div class="form-group">
+                <label class="form-label">活动内容</label>
+                <textarea class="form-textarea" id="ceContent" placeholder="描述具体做了什么"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">时长（分钟）</label>
+                <div class="form-counter">
+                    <button class="counter-btn" onclick="App.counter('ceDuration',-5)">−</button>
+                    <input type="number" class="counter-value" id="ceDuration" value="15" style="text-align:center;border:none;font-size:20px;font-weight:700;width:80px">
+                    <button class="counter-btn" onclick="App.counter('ceDuration',5)">+</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">备注</label>
+                <textarea class="form-textarea" id="ceNote" placeholder="宝宝的表现、进步等"></textarea>
+            </div>
+        `;
+
+        this.showModal('添加早教活动', body, () => {
+            Storage.add('customEarly', {
+                date: document.getElementById('ceDate').value,
+                time: document.getElementById('ceTime').value,
+                title: this.val('ceTitle'),
+                content: this.val('ceContent'),
+                duration: this.val('ceDuration'),
+                note: this.val('ceNote')
+            });
+            this.renderEarly();
+            this.toast('早教记录已添加');
+        });
+    },
+
+    // ===== 购物清单 =====
+    renderShopping() {
+        const records = Storage.getAll('shopping').sort((a, b) => new Date(b.date) - new Date(a.date));
+        const container = document.getElementById('shoppingList');
+        const summary = document.getElementById('shoppingSummary');
+
+        if (records.length === 0) {
+            summary.innerHTML = '';
+            container.innerHTML = '<div class="empty-state">暂无购物记录，点击上方按钮开始记录吧</div>';
+            return;
+        }
+
+        // 按月分组
+        const groups = {};
+        records.forEach(r => {
+            const month = r.date ? r.date.substring(0, 7) : '未知';
+            if (!groups[month]) groups[month] = { records: [], total: 0 };
+            groups[month].records.push(r);
+            groups[month].total += parseFloat(r.price) || 0;
+        });
+
+        // 总览
+        const totalAll = Object.values(groups).reduce((sum, g) => sum + g.total, 0);
+        summary.innerHTML = `
+            <div class="shopping-total-card">
+                <div class="shopping-total-label">📊 累计消费</div>
+                <div class="shopping-total-value">¥${totalAll.toFixed(2)}</div>
+                <div class="shopping-total-desc">共 ${records.length} 件物品</div>
+            </div>
+        `;
+
+        container.innerHTML = Object.entries(groups).map(([month, group]) => {
+            const [y, m] = month.split('-');
+            return `
+                <div class="shopping-month-card">
+                    <div class="shopping-month-header">
+                        <div class="shopping-month-title">📅 ${y}年${parseInt(m)}月</div>
+                        <div class="shopping-month-total">¥${group.total.toFixed(2)}</div>
+                    </div>
+                    <div class="shopping-month-items">
+                        ${group.records.map(r => `
+                            <div class="record-card" data-type="shopping">
+                                <div class="record-card-header">
+                                    <div class="record-title">🛍️ ${this.escape(r.item || '物品')}</div>
+                                    <div class="record-date">${Utils.formatDateFull(r.date)}</div>
+                                </div>
+                                <div class="record-detail">
+                                    ${r.category ? '<strong>分类：</strong>' + this.escape(r.category) + '<br>' : ''}
+                                    <strong>价格：</strong>¥${parseFloat(r.price || 0).toFixed(2)}<br>
+                                    ${r.rating ? '<strong>评分：</strong>' + '⭐'.repeat(parseInt(r.rating)) + '<br>' : ''}
+                                    ${r.store ? '<strong>渠道：</strong>' + this.escape(r.store) + '<br>' : ''}
+                                    ${r.note ? '<strong>感受：</strong>' + this.escape(r.note) : ''}
+                                </div>
+                                <div class="record-actions">
+                                    <button class="record-edit" onclick="App.editShopping('${r.id}')">✏️</button>
+                                    <button class="record-delete" onclick="App.deleteRecord('shopping','${r.id}')">🗑</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    },
+
+    formShopping(editId = null) {
+        let editData = {};
+        if (editId) {
+            const db = Storage.load();
+            editData = (db.shopping || []).find(r => r.id === editId) || {};
+        }
+        const body = `
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">购买日期 <span class="required">*</span></label>
+                    <input type="date" class="form-input" id="shopDate" value="${editData.date || Utils.todayStr()}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">价格(元)</label>
+                    <input type="number" class="form-input" id="shopPrice" value="${editData.price || ''}" placeholder="0.00" step="0.01">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">物品名称 <span class="required">*</span></label>
+                <input type="text" class="form-input" id="shopItem" value="${this.escape(editData.item || '')}" placeholder="如：婴儿推车、学步鞋">
+            </div>
+            <div class="form-group">
+                <label class="form-label">分类</label>
+                <div class="form-chips" id="shopCatChips" data-multi="true">
+                    <div class="form-chip ${(editData.category || '').includes('衣物') ? 'active' : ''}" data-value="衣物">👗 衣物</div>
+                    <div class="form-chip ${(editData.category || '').includes('喂养') ? 'active' : ''}" data-value="喂养">🍼 喂养</div>
+                    <div class="form-chip ${(editData.category || '').includes('尿布') ? 'active' : ''}" data-value="尿布">🧷 尿布</div>
+                    <div class="form-chip ${(editData.category || '').includes('玩具') ? 'active' : ''}" data-value="玩具">🧸 玩具</div>
+                    <div class="form-chip ${(editData.category || '').includes('洗护') ? 'active' : ''}" data-value="洗护">🛁 洗护</div>
+                    <div class="form-chip ${(editData.category || '').includes('出行') ? 'active' : ''}" data-value="出行">🚗 出行</div>
+                    <div class="form-chip ${(editData.category || '').includes('其他') ? 'active' : ''}" data-value="其他">📦 其他</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">好用程度</label>
+                <div class="form-chips" id="shopRatingChips">
+                    <div class="form-chip ${parseInt(editData.rating) === 1 ? 'active' : ''}" data-value="1">⭐</div>
+                    <div class="form-chip ${parseInt(editData.rating) === 2 ? 'active' : ''}" data-value="2">⭐⭐</div>
+                    <div class="form-chip ${parseInt(editData.rating) === 3 ? 'active' : ''}" data-value="3">⭐⭐⭐</div>
+                    <div class="form-chip ${parseInt(editData.rating) === 4 ? 'active' : ''}" data-value="4">⭐⭐⭐⭐</div>
+                    <div class="form-chip ${parseInt(editData.rating) === 5 ? 'active' : ''}" data-value="5">⭐⭐⭐⭐⭐</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">购买渠道</label>
+                <input type="text" class="form-input" id="shopStore" value="${this.escape(editData.store || '')}" placeholder="如：淘宝、京东、母婴店">
+            </div>
+            <div class="form-group">
+                <label class="form-label">使用感受</label>
+                <textarea class="form-textarea" id="shopNote" placeholder="好不好用？有什么心得？">${this.escape(editData.note || '')}</textarea>
+            </div>
+        `;
+
+        this.showModal(editId ? '编辑购物记录' : '添加购物记录', body, () => {
+            const date = document.getElementById('shopDate').value;
+            const item = this.val('shopItem');
+            if (!date) { this.toast('请选择日期'); return false; }
+            if (!item) { this.toast('请输入物品名称'); return false; }
+            const data = {
+                date,
+                item,
+                category: this.getMultiChipValues('shopCatChips'),
+                price: this.val('shopPrice') || '0',
+                rating: document.querySelector('#shopRatingChips .active')?.dataset.value || '',
+                store: this.val('shopStore'),
+                note: this.val('shopNote')
+            };
+            if (editId) {
+                Storage.update('shopping', editId, data);
+                this.toast('购物记录已更新');
+            } else {
+                Storage.add('shopping', data);
+                this.toast('购物记录已添加');
+            }
+            this.renderShopping();
+        });
+        this.bindChips('shopCatChips');
+        this.bindChips('shopRatingChips');
+    },
+
+    editShopping(id) {
+        this.formShopping(id);
     },
 
     renderExercise() {
@@ -970,6 +1389,7 @@ const App = {
     },
 
     editRecord(type, id) {
+        if (type === 'shopping') { this.editShopping(id); return; }
         const db = Storage.load();
         const record = (db[type] || []).find(r => r.id === id);
         if (!record) return;
@@ -1017,7 +1437,12 @@ const App = {
             headCircumference: '头围(cm)', fontanelle: '前囟门(cm)', result: '结果',
             advice: '建议', drugName: '药品名称', dosage: '剂量', frequency: '频率',
             food: '食物', method: '方式', content: '内容', title: '标题',
-            milestone: '里程碑', skill: '技能', description: '描述', date: '日期'
+            milestone: '里程碑', skill: '技能', description: '描述', date: '日期',
+            item: '物品名称', price: '价格', rating: '评分', store: '购买渠道',
+            songName: '歌曲名称', category: '分类', medicineName: '药品名称',
+            exerciseType: '运动类型', activity: '活动类型', sleepType: '睡眠类型',
+            feedType: '喂养类型', bookName: '书名', diaperType: '尿布状态',
+            quality: '睡眠质量', mood: '心情', weather: '天气'
         };
         return labels[key] || key;
     },
@@ -1260,7 +1685,8 @@ const App = {
             growth: () => this.formGrowth(),
             milestone: () => this.formMilestone(),
             motor: () => this.formMotor(),
-            diary: () => this.formDiary()
+            diary: () => this.formDiary(),
+            shopping: () => this.formShopping()
         };
         if (forms[type]) forms[type]();
     },
@@ -1269,9 +1695,6 @@ const App = {
         const forms = {
             feeding: () => this.formFeeding(),
             sleep: () => this.formSleep(),
-            outdoor: () => this.formOutdoor(),
-            exercise: () => this.formExercise(),
-            story: () => this.formStory(),
             diaper: () => this.formDiaper(),
             bath: () => this.formBath()
         };
@@ -1716,7 +2139,7 @@ const App = {
                 weather: document.getElementById('outWeather').value,
                 note: this.val('outNote')
             });
-            this.renderDaily();
+            this.renderEarly();
             this.renderDashboard();
             this.toast('户外活动已记录');
         });
@@ -1778,7 +2201,7 @@ const App = {
                 reaction: this.getMultiChipValues('storyReactionChips'),
                 note: this.val('storyNote')
             });
-            this.renderDaily();
+            this.renderEarly();
             this.renderDashboard();
             this.toast('故事时间已记录');
         });
@@ -1914,7 +2337,7 @@ const App = {
                 duration: this.val('exDuration'),
                 note: this.val('exNote')
             });
-            this.renderDaily();
+            this.renderEarly();
             this.renderDashboard();
             this.toast('运动记录已添加');
         });

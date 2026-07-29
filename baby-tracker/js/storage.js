@@ -28,6 +28,9 @@ const Storage = {
             milestone: [],    // 发育里程碑
             motor: [],        // 运动发展
             diary: [],        // 成长日记
+            shopping: [],     // 购物记录
+            music: [],        // 音乐早教
+            customEarly: [],  // 自定义早教
             timeline: {},     // 按日期组织的每日时间线 { '2024-01-01': [...] }
             settings: {
                 storyTime: '20:00',    // 默认故事时间

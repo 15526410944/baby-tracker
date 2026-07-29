@@ -31,6 +31,14 @@
                     <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     <span class="nav-label">日常</span>
                 </button>
+                <button class="nav-btn" data-page="early" title="早教">
+                    <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="12" y2="10"/><line x1="10" y1="8" x2="14" y2="8"/></svg>
+                    <span class="nav-label">早教</span>
+                </button>
+                <button class="nav-btn" data-page="shopping" title="购物">
+                    <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    <span class="nav-label">购物</span>
+                </button>
                 <button class="nav-btn" data-page="growth" title="成长">
                     <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
                     <span class="nav-label">成长</span>
@@ -87,15 +95,15 @@
                             <div class="dash-stat-value" id="todaySleep">0h</div>
                             <div class="dash-stat-label">睡眠</div>
                         </div>
-                        <div class="dash-stat" data-nav="outdoor">
-                            <div class="dash-stat-icon">🌳</div>
-                            <div class="dash-stat-value" id="todayOutdoor">0min</div>
-                            <div class="dash-stat-label">户外</div>
+                        <div class="dash-stat" data-nav="diaper">
+                            <div class="dash-stat-icon">🧷</div>
+                            <div class="dash-stat-value" id="todayOutdoor">0次</div>
+                            <div class="dash-stat-label">尿布</div>
                         </div>
-                        <div class="dash-stat" data-nav="story">
-                            <div class="dash-stat-icon">📖</div>
+                        <div class="dash-stat" data-nav="bath">
+                            <div class="dash-stat-icon">🛁</div>
                             <div class="dash-stat-value" id="todayStory">0次</div>
-                            <div class="dash-stat-label">故事</div>
+                            <div class="dash-stat-label">洗澡</div>
                         </div>
                     </div>
                 </div>
@@ -118,14 +126,14 @@
                             <span class="todo-text">记录今日睡眠</span>
                         </label>
                         <label class="dash-todo-item">
-                            <input type="checkbox" data-todo="outdoor">
+                            <input type="checkbox" data-todo="diaper">
                             <span class="todo-check"></span>
-                            <span class="todo-text">记录户外活动</span>
+                            <span class="todo-text">记录今日尿布</span>
                         </label>
                         <label class="dash-todo-item">
-                            <input type="checkbox" data-todo="story">
+                            <input type="checkbox" data-todo="bath">
                             <span class="todo-check"></span>
-                            <span class="todo-text">记录故事时间</span>
+                            <span class="todo-text">记录今日洗澡</span>
                         </label>
                     </div>
                 </div>
@@ -144,13 +152,9 @@
                         <span class="dash-quick-icon">🧷</span>
                         <span>尿布</span>
                     </button>
-                    <button class="dash-quick-btn" data-action="quick-outdoor">
-                        <span class="dash-quick-icon">🌳</span>
-                        <span>户外</span>
-                    </button>
-                    <button class="dash-quick-btn" data-action="quick-story">
-                        <span class="dash-quick-icon">📖</span>
-                        <span>故事</span>
+                    <button class="dash-quick-btn" data-action="quick-bath">
+                        <span class="dash-quick-icon">🛁</span>
+                        <span>洗澡</span>
                     </button>
                     <button class="dash-quick-btn" data-action="quick-diary">
                         <span class="dash-quick-icon">📝</span>
@@ -215,16 +219,8 @@
                 <div class="daily-nav">
                     <button class="daily-tab active" data-dtab="feeding">🍼 喂养</button>
                     <button class="daily-tab" data-dtab="sleep">😴 睡眠</button>
-                    <button class="daily-tab" data-dtab="outdoor">🌳 户外</button>
-                    <button class="daily-tab" data-dtab="exercise">🤸 运动</button>
-                    <button class="daily-tab" data-dtab="story">📖 故事</button>
                     <button class="daily-tab" data-dtab="diaper">🧷 尿布</button>
                     <button class="daily-tab" data-dtab="bath">🛁 洗澡</button>
-                </div>
-
-                <div class="daily-content" id="dtab-exercise">
-                    <button class="add-btn" data-dadd="exercise">+ 记录运动</button>
-                    <div class="record-list" id="exerciseList"></div>
                 </div>
 
                 <div class="daily-content active" id="dtab-feeding">
@@ -234,14 +230,6 @@
                 <div class="daily-content" id="dtab-sleep">
                     <button class="add-btn" data-dadd="sleep">+ 记录睡眠</button>
                     <div class="record-list" id="sleepList"></div>
-                </div>
-                <div class="daily-content" id="dtab-outdoor">
-                    <button class="add-btn" data-dadd="outdoor">+ 记录户外</button>
-                    <div class="record-list" id="outdoorList"></div>
-                </div>
-                <div class="daily-content" id="dtab-story">
-                    <button class="add-btn" data-dadd="story">+ 记录故事</button>
-                    <div class="record-list" id="storyList"></div>
                 </div>
                 <div class="daily-content" id="dtab-diaper">
                     <button class="add-btn" data-dadd="diaper">+ 记录尿布</button>
@@ -288,6 +276,47 @@
                 <div class="section-title">成长日记</div>
                 <button class="add-btn" data-add="diary">+ 写新日记</button>
                 <div class="diary-list" id="diaryList"></div>
+            </section>
+
+            <!-- 早教页面 -->
+            <section class="page" id="page-early">
+                <div class="section-title">早教启蒙</div>
+                <div class="early-nav">
+                    <button class="early-tab active" data-etab="outdoor">🌳 户外</button>
+                    <button class="early-tab" data-etab="exercise">🤸 运动</button>
+                    <button class="early-tab" data-etab="story">📖 绘本</button>
+                    <button class="early-tab" data-etab="music">🎵 音乐</button>
+                    <button class="early-tab" data-etab="customEarly" id="earlyCustomTabBtn">➕ 自定义</button>
+                </div>
+
+                <div class="early-content active" id="etab-outdoor">
+                    <button class="add-btn" data-eadd="outdoor">+ 记录户外</button>
+                    <div class="record-list" id="earlyOutdoorList"></div>
+                </div>
+                <div class="early-content" id="etab-exercise">
+                    <button class="add-btn" data-eadd="exercise">+ 记录运动</button>
+                    <div class="record-list" id="earlyExerciseList"></div>
+                </div>
+                <div class="early-content" id="etab-story">
+                    <button class="add-btn" data-eadd="story">+ 记录绘本</button>
+                    <div class="record-list" id="earlyStoryList"></div>
+                </div>
+                <div class="early-content" id="etab-music">
+                    <button class="add-btn" data-eadd="music">+ 记录音乐</button>
+                    <div class="record-list" id="musicList"></div>
+                </div>
+                <div class="early-content" id="etab-customEarly">
+                    <button class="add-btn" data-eadd="customEarly">+ 添加自定义记录</button>
+                    <div class="record-list" id="customEarlyList"></div>
+                </div>
+            </section>
+
+            <!-- 购物页面 -->
+            <section class="page" id="page-shopping">
+                <div class="section-title">购物清单</div>
+                <button class="add-btn" data-add="shopping">+ 添加购物记录</button>
+                <div class="shopping-summary" id="shoppingSummary"></div>
+                <div class="record-list" id="shoppingList"></div>
             </section>
         </main>
         </div>
