@@ -100,7 +100,7 @@ const App = {
         });
 
         // 早教tab切换
-        document.querySelectorAll('.early-tab').forEach(tab => {
+        document.querySelectorAll('.early-nav-btn').forEach(tab => {
             tab.addEventListener('click', () => this.switchEarlyTab(tab.dataset.etab));
         });
 
@@ -689,9 +689,9 @@ const App = {
 
     // ===== 早教启蒙 =====
     switchEarlyTab(tab) {
-        document.querySelectorAll('.early-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.early-nav-btn').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.early-content').forEach(c => c.classList.remove('active'));
-        const tabBtn = document.querySelector(`.early-tab[data-etab="${tab}"]`);
+        const tabBtn = document.querySelector(`.early-nav-btn[data-etab="${tab}"]`);
         if (tabBtn) tabBtn.classList.add('active');
         const content = document.getElementById(`etab-${tab}`);
         if (content) content.classList.add('active');

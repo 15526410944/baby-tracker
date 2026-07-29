@@ -281,33 +281,51 @@
             <!-- 早教页面 -->
             <section class="page" id="page-early">
                 <div class="section-title">早教启蒙</div>
-                <div class="early-nav">
-                    <button class="early-tab active" data-etab="outdoor">🌳 户外</button>
-                    <button class="early-tab" data-etab="exercise">🤸 运动</button>
-                    <button class="early-tab" data-etab="story">📖 绘本</button>
-                    <button class="early-tab" data-etab="music">🎵 音乐</button>
-                    <button class="early-tab" data-etab="customEarly" id="earlyCustomTabBtn">➕ 自定义</button>
-                </div>
-
-                <div class="early-content active" id="etab-outdoor">
-                    <button class="add-btn" data-eadd="outdoor">+ 记录户外</button>
-                    <div class="record-list" id="earlyOutdoorList"></div>
-                </div>
-                <div class="early-content" id="etab-exercise">
-                    <button class="add-btn" data-eadd="exercise">+ 记录运动</button>
-                    <div class="record-list" id="earlyExerciseList"></div>
-                </div>
-                <div class="early-content" id="etab-story">
-                    <button class="add-btn" data-eadd="story">+ 记录绘本</button>
-                    <div class="record-list" id="earlyStoryList"></div>
-                </div>
-                <div class="early-content" id="etab-music">
-                    <button class="add-btn" data-eadd="music">+ 记录音乐</button>
-                    <div class="record-list" id="musicList"></div>
-                </div>
-                <div class="early-content" id="etab-customEarly">
-                    <button class="add-btn" data-eadd="customEarly">+ 添加自定义记录</button>
-                    <div class="record-list" id="customEarlyList"></div>
+                <div class="early-layout">
+                    <div class="early-sidebar">
+                        <button class="early-nav-btn active" data-etab="outdoor" title="户外">
+                            <span class="early-nav-icon">🌳</span>
+                            <span class="early-nav-label">户外</span>
+                        </button>
+                        <button class="early-nav-btn" data-etab="exercise" title="运动">
+                            <span class="early-nav-icon">🤸</span>
+                            <span class="early-nav-label">运动</span>
+                        </button>
+                        <button class="early-nav-btn" data-etab="story" title="绘本">
+                            <span class="early-nav-icon">📖</span>
+                            <span class="early-nav-label">绘本</span>
+                        </button>
+                        <button class="early-nav-btn" data-etab="music" title="音乐">
+                            <span class="early-nav-icon">🎵</span>
+                            <span class="early-nav-label">音乐</span>
+                        </button>
+                        <button class="early-nav-btn" data-etab="customEarly" id="earlyCustomTabBtn" title="自定义">
+                            <span class="early-nav-icon">➕</span>
+                            <span class="early-nav-label">自定义</span>
+                        </button>
+                    </div>
+                    <div class="early-main">
+                        <div class="early-content active" id="etab-outdoor">
+                            <button class="add-btn" data-eadd="outdoor">+ 记录户外</button>
+                            <div class="record-list" id="earlyOutdoorList"></div>
+                        </div>
+                        <div class="early-content" id="etab-exercise">
+                            <button class="add-btn" data-eadd="exercise">+ 记录运动</button>
+                            <div class="record-list" id="earlyExerciseList"></div>
+                        </div>
+                        <div class="early-content" id="etab-story">
+                            <button class="add-btn" data-eadd="story">+ 记录绘本</button>
+                            <div class="record-list" id="earlyStoryList"></div>
+                        </div>
+                        <div class="early-content" id="etab-music">
+                            <button class="add-btn" data-eadd="music">+ 记录音乐</button>
+                            <div class="record-list" id="musicList"></div>
+                        </div>
+                        <div class="early-content" id="etab-customEarly">
+                            <button class="add-btn" data-eadd="customEarly">+ 添加自定义记录</button>
+                            <div class="record-list" id="customEarlyList"></div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
