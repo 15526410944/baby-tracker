@@ -1772,6 +1772,18 @@ input, textarea, select {
     padding: 2px 8px;
     border-radius: 10px;
 }
+
+/* ===== 图表切换按钮 ===== */
+.chart-toggle { display:flex; gap:6px; margin-bottom:8px; }
+.chart-toggle-btn { flex:1; padding:6px; border-radius:8px; font-size:12px; font-weight:600; background:var(--card-bg); color:var(--text-light); box-shadow:var(--shadow); border:none; cursor:pointer; transition:all 0.2s; }
+.chart-toggle-btn.active { background:var(--primary); color:#fff; }
+
+/* ===== 疫苗提醒卡片 ===== */
+.dash-vaccine-card { background:var(--card-bg); border-radius:16px; padding:16px; margin-bottom:14px; box-shadow:var(--shadow); }
+.dash-vaccine-item { display:flex; gap:8px; padding:8px 0; border-bottom:1px solid var(--border); align-items:flex-start; }
+.dash-vaccine-item:last-child { border-bottom:none; }
+.dash-vaccine-dot { width:6px; height:6px; border-radius:50%; margin-top:6px; flex-shrink:0; }
+.dash-vaccine-text { font-size:13px; color:var(--text); line-height:1.5; flex:1; }
 </style>
     <title>宝宝成长记</title>
 </head>
@@ -1874,6 +1886,14 @@ input, textarea, select {
                             <div class="dash-push-text">加载中...</div>
                         </div>
                     </div>
+                </div>
+
+                <!-- 疫苗提醒 -->
+                <div class="dash-vaccine-card" id="dashVaccineCard" style="display:none">
+                    <div class="dash-push-header">
+                        <div class="dash-push-title">💉 疫苗提醒</div>
+                    </div>
+                    <div class="dash-vaccine-list" id="dashVaccineList"></div>
                 </div>
 
                 <!-- 今日时间线 -->
@@ -2765,6 +2785,92 @@ const PushData = {
 };
 
 /**
+ * WHO 生长标准数据 (0-24个月)
+ * 来源: WHO Child Growth Standards
+ */
+const WhoGrowth = {
+    girl: {
+        0:  { height: { p3:45.4, p15:47.0, p50:49.1, p85:51.3, p97:52.9 }, weight: { p3:2.4, p15:2.8, p50:3.2, p85:3.7, p97:4.0 } },
+        1:  { height: { p3:49.8, p15:51.4, p50:53.7, p85:55.9, p97:57.6 }, weight: { p3:3.2, p15:3.6, p50:4.2, p85:4.8, p97:5.2 } },
+        2:  { height: { p3:53.0, p15:54.7, p50:57.1, p85:59.4, p97:61.1 }, weight: { p3:3.9, p15:4.5, p50:5.1, p85:5.8, p97:6.3 } },
+        3:  { height: { p3:55.6, p15:57.3, p50:59.8, p85:62.3, p97:64.0 }, weight: { p3:4.5, p15:5.2, p50:5.8, p85:6.6, p97:7.2 } },
+        4:  { height: { p3:57.8, p15:59.6, p50:62.1, p85:64.7, p97:66.4 }, weight: { p3:5.0, p15:5.7, p50:6.4, p85:7.3, p97:7.9 } },
+        5:  { height: { p3:59.6, p15:61.5, p50:64.0, p85:66.7, p97:68.5 }, weight: { p3:5.4, p15:6.1, p50:6.9, p85:7.8, p97:8.5 } },
+        6:  { height: { p3:61.2, p15:63.1, p50:65.7, p85:68.5, p97:70.3 }, weight: { p3:5.7, p15:6.5, p50:7.3, p85:8.3, p97:9.0 } },
+        7:  { height: { p3:62.7, p15:64.6, p50:67.3, p85:70.1, p97:72.0 }, weight: { p3:6.0, p15:6.8, p50:7.6, p85:8.7, p97:9.4 } },
+        8:  { height: { p3:64.0, p15:66.0, p50:68.7, p85:71.7, p97:73.6 }, weight: { p3:6.3, p15:7.0, p50:7.9, p85:9.0, p97:9.8 } },
+        9:  { height: { p3:65.3, p15:67.3, p50:70.1, p85:73.1, p97:75.1 }, weight: { p3:6.5, p15:7.3, p50:8.2, p85:9.3, p97:10.1 } },
+        10: { height: { p3:66.5, p15:68.5, p50:71.5, p85:74.5, p97:76.5 }, weight: { p3:6.7, p15:7.5, p50:8.5, p85:9.6, p97:10.4 } },
+        11: { height: { p3:67.7, p15:69.8, p50:72.8, p85:75.9, p97:77.9 }, weight: { p3:6.9, p15:7.7, p50:8.7, p85:9.9, p97:10.7 } },
+        12: { height: { p3:68.9, p15:71.0, p50:74.0, p85:77.2, p97:79.3 }, weight: { p3:7.0, p15:7.9, p50:8.9, p85:10.2, p97:11.0 } },
+        15: { height: { p3:72.2, p15:74.4, p50:77.5, p85:80.8, p97:83.0 }, weight: { p3:7.6, p15:8.5, p50:9.6, p85:10.9, p97:11.8 } },
+        18: { height: { p3:75.0, p15:77.2, p50:80.7, p85:84.1, p97:86.4 }, weight: { p3:8.1, p15:9.1, p50:10.2, p85:11.6, p97:12.6 } },
+        21: { height: { p3:77.7, p15:80.0, p50:83.6, p85:87.1, p97:89.5 }, weight: { p3:8.6, p15:9.6, p50:10.9, p85:12.3, p97:13.3 } },
+        24: { height: { p3:80.0, p15:82.5, p50:86.4, p85:90.0, p97:92.5 }, weight: { p3:9.0, p15:10.2, p50:11.5, p85:13.0, p97:14.1 } },
+    },
+    boy: {
+        0:  { height: { p3:46.1, p15:47.7, p50:49.9, p85:52.1, p97:53.7 }, weight: { p3:2.5, p15:2.9, p50:3.3, p85:3.8, p97:4.2 } },
+        1:  { height: { p3:50.8, p15:52.4, p50:54.7, p85:57.0, p97:58.6 }, weight: { p3:3.4, p15:3.9, p50:4.5, p85:5.1, p97:5.5 } },
+        2:  { height: { p3:54.4, p15:56.1, p50:58.4, p85:60.8, p97:62.5 }, weight: { p3:4.3, p15:4.9, p50:5.6, p85:6.3, p97:6.8 } },
+        3:  { height: { p3:57.3, p15:59.1, p50:61.4, p85:63.9, p97:65.6 }, weight: { p3:5.0, p15:5.7, p50:6.4, p85:7.2, p97:7.8 } },
+        4:  { height: { p3:59.7, p15:61.5, p50:63.9, p85:66.4, p97:68.2 }, weight: { p3:5.6, p15:6.3, p50:7.0, p85:7.9, p97:8.5 } },
+        5:  { height: { p3:61.7, p15:63.6, p50:66.0, p85:68.6, p97:70.4 }, weight: { p3:6.0, p15:6.7, p50:7.5, p85:8.4, p97:9.1 } },
+        6:  { height: { p3:63.4, p15:65.3, p50:67.8, p85:70.5, p97:72.3 }, weight: { p3:6.4, p15:7.1, p50:7.9, p85:8.9, p97:9.6 } },
+        7:  { height: { p3:64.9, p15:66.9, p50:69.5, p85:72.2, p97:74.1 }, weight: { p3:6.7, p15:7.4, p50:8.3, p85:9.3, p97:10.1 } },
+        8:  { height: { p3:66.3, p15:68.3, p50:71.0, p85:73.8, p97:75.7 }, weight: { p3:6.9, p15:7.7, p50:8.6, p85:9.7, p97:10.5 } },
+        9:  { height: { p3:67.7, p15:69.7, p50:72.5, p85:75.3, p97:77.3 }, weight: { p3:7.2, p15:8.0, p50:8.9, p85:10.0, p97:10.9 } },
+        10: { height: { p3:69.0, p15:71.1, p50:73.9, p85:76.8, p97:78.8 }, weight: { p3:7.4, p15:8.2, p50:9.2, p85:10.3, p97:11.2 } },
+        11: { height: { p3:70.3, p15:72.4, p50:75.3, p85:78.2, p97:80.3 }, weight: { p3:7.6, p15:8.4, p50:9.4, p85:10.6, p97:11.5 } },
+        12: { height: { p3:71.5, p15:73.7, p50:76.6, p85:79.6, p97:81.7 }, weight: { p3:7.8, p15:8.6, p50:9.6, p85:10.9, p97:11.8 } },
+        15: { height: { p3:75.0, p15:77.3, p50:80.2, p85:83.3, p97:85.5 }, weight: { p3:8.4, p15:9.3, p50:10.4, p85:11.7, p97:12.7 } },
+        18: { height: { p3:78.0, p15:80.4, p50:83.6, p85:86.8, p97:89.2 }, weight: { p3:9.0, p15:10.0, p50:11.2, p85:12.6, p97:13.7 } },
+        21: { height: { p3:80.8, p15:83.3, p50:86.7, p85:90.0, p97:92.5 }, weight: { p3:9.5, p15:10.6, p50:11.9, p85:13.4, p97:14.6 } },
+        24: { height: { p3:83.5, p15:86.1, p50:89.6, p85:93.0, p97:95.7 }, weight: { p3:10.1, p15:11.2, p50:12.7, p85:14.3, p97:15.5 } },
+    }
+};
+
+/**
+ * 中国免疫规划疫苗程序表
+ * 来源: 中国国家免疫规划
+ */
+const VaccineSchedule = [
+    { name: '乙肝疫苗', dose: 1, month: 0, desc: '出生24小时内' },
+    { name: '卡介苗', dose: 1, month: 0, desc: '出生后尽早' },
+    { name: '乙肝疫苗', dose: 2, month: 1, desc: '满月' },
+    { name: '脊灰疫苗', dose: 1, month: 2, desc: '2月龄' },
+    { name: '脊灰疫苗', dose: 2, month: 3, desc: '3月龄' },
+    { name: '百白破', dose: 1, month: 3, desc: '3月龄' },
+    { name: '脊灰疫苗', dose: 3, month: 4, desc: '4月龄' },
+    { name: '百白破', dose: 2, month: 4, desc: '4月龄' },
+    { name: '百白破', dose: 3, month: 5, desc: '5月龄' },
+    { name: '乙肝疫苗', dose: 3, month: 6, desc: '6月龄' },
+    { name: 'A群流脑', dose: 1, month: 6, desc: '6月龄' },
+    { name: '麻腮风', dose: 1, month: 8, desc: '8月龄' },
+    { name: '乙脑减毒活疫苗', dose: 1, month: 8, desc: '8月龄' },
+    { name: 'A群流脑', dose: 2, month: 9, desc: '9月龄' },
+    { name: '水痘疫苗', dose: 1, month: 12, desc: '12月龄（自费推荐）' },
+    { name: '麻腮风', dose: 2, month: 18, desc: '18月龄' },
+    { name: '甲肝减毒活疫苗', dose: 1, month: 18, desc: '18月龄' },
+    { name: '百白破', dose: 4, month: 18, desc: '18月龄（加强）' },
+    { name: '乙脑减毒活疫苗', dose: 2, month: 24, desc: '2岁' },
+];
+
+VaccineSchedule.getReminders = function(birthDate, vaccinated) {
+    if (!birthDate) return [];
+    const months = Math.floor((new Date() - new Date(birthDate)) / (1000*60*60*24*30.44));
+    const nextMonth = months + 1;
+    
+    return this.filter(v => {
+        if (v.month > nextMonth || v.month < months - 1) return false;
+        const already = vaccinated.some(vac => 
+            vac.vaccineName && vac.vaccineName.includes(v.name) && 
+            (!vac.dose || vac.dose.includes(String(v.dose)) || v.dose === 1)
+        );
+        return !already;
+    });
+};
+
+/**
  * 宝宝成长记 - 主应用逻辑
  */
 
@@ -3021,6 +3127,9 @@ const App = {
         // 每日推送精选
         this.renderDashPush();
 
+        // 疫苗提醒
+        this.renderVaccineReminder();
+
         // 今日时间线
         this.renderTimeline();
     },
@@ -3116,6 +3225,35 @@ const App = {
         todoChecks.forEach(cb => { if (cb.checked) done++; });
         const countEl = document.getElementById('todoCount');
         if (countEl) countEl.textContent = `${done}/${todoChecks.length}`;
+    },
+
+    // 疫苗提醒
+    renderVaccineReminder() {
+        const db = Storage.load();
+        if (!db.baby.birthDate) return;
+        if (typeof VaccineSchedule === 'undefined') return;
+        
+        const reminders = VaccineSchedule.getReminders(db.baby.birthDate, db.vaccine || []);
+        const card = document.getElementById('dashVaccineCard');
+        const list = document.getElementById('dashVaccineList');
+        
+        if (!card || !list) return;
+        
+        if (reminders.length === 0) {
+            card.style.display = 'none';
+            return;
+        }
+        
+        card.style.display = 'block';
+        list.innerHTML = reminders.map(v => `
+            <div class="dash-vaccine-item">
+                <span class="dash-vaccine-dot" style="background:#E85D75"></span>
+                <div class="dash-vaccine-text">
+                    <strong>${v.name}</strong> 第${v.dose}剂
+                    <span class="dash-push-tag">${v.desc}</span>
+                </div>
+            </div>
+        `).join('');
     },
 
     renderTimeline() {
@@ -4005,107 +4143,203 @@ const App = {
 
     drawGrowthChart(records) {
         const canvas = document.getElementById('growthChart');
-        const ctx = canvas.getContext('2d');
-        const dpr = window.devicePixelRatio || 1;
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        ctx.scale(dpr, dpr);
-
-        const w = rect.width;
-        const h = rect.height;
-        const padding = { top: 20, right: 20, bottom: 30, left: 35 };
-        const chartW = w - padding.left - padding.right;
-        const chartH = h - padding.top - padding.bottom;
-
-        ctx.clearRect(0, 0, w, h);
-
-        if (records.length === 0) return;
-
-        const heights = records.map(r => parseFloat(r.height)).filter(v => !isNaN(v));
-        const weights = records.map(r => parseFloat(r.weight)).filter(v => !isNaN(v));
-
-        if (heights.length === 0 && weights.length === 0) return;
-
-        const minH = Math.min(...heights) * 0.9;
-        const maxH = Math.max(...heights) * 1.1;
-        const minW = Math.min(...weights) * 0.9;
-        const maxW = Math.max(...weights) * 1.1;
-
-        // 绘制坐标轴
-        ctx.strokeStyle = '#eee';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(padding.left, padding.top);
-        ctx.lineTo(padding.left, h - padding.bottom);
-        ctx.lineTo(w - padding.right, h - padding.bottom);
-        ctx.stroke();
-
-        // 绘制身高曲线
-        if (heights.length > 0) {
-            ctx.strokeStyle = '#FF8FA3';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            records.forEach((r, i) => {
-                const h = parseFloat(r.height);
-                if (isNaN(h)) return;
-                const x = padding.left + (chartW / Math.max(records.length - 1, 1)) * i;
-                const y = padding.top + chartH - ((h - minH) / (maxH - minH || 1)) * chartH;
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
+        if (!canvas) return;
+        
+        const db = Storage.load();
+        const gender = db.baby.gender || 'girl';
+        const whoData = (typeof WhoGrowth !== 'undefined') ? (WhoGrowth[gender] || WhoGrowth.girl) : null;
+        
+        let chartType = canvas.dataset.chartType || 'height';
+        const container = canvas.parentElement;
+        let toggleBar = container.querySelector('.chart-toggle');
+        if (!toggleBar) {
+            toggleBar = document.createElement('div');
+            toggleBar.className = 'chart-toggle';
+            toggleBar.innerHTML = '<button class="chart-toggle-btn '+(chartType==='height'?'active':'')+'" data-type="height">📏 身高</button><button class="chart-toggle-btn '+(chartType==='weight'?'active':'')+'" data-type="weight">⚖️ 体重</button>';
+            container.insertBefore(toggleBar, canvas);
+            toggleBar.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    canvas.dataset.chartType = e.target.dataset.type;
+                    this.drawGrowthChart(records);
+                });
             });
-            ctx.stroke();
-
-            // 绘制点
-            ctx.fillStyle = '#FF8FA3';
-            records.forEach((r, i) => {
-                const h = parseFloat(r.height);
-                if (isNaN(h)) return;
-                const x = padding.left + (chartW / Math.max(records.length - 1, 1)) * i;
-                const y = padding.top + chartH - ((h - minH) / (maxH - minH || 1)) * chartH;
-                ctx.beginPath();
-                ctx.arc(x, y, 3, 0, Math.PI * 2);
-                ctx.fill();
+        } else {
+            toggleBar.querySelectorAll('button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.type === chartType);
             });
         }
 
-        // 绘制体重曲线
-        if (weights.length > 0) {
-            ctx.strokeStyle = '#B5EAD7';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            records.forEach((r, i) => {
-                const wt = parseFloat(r.weight);
-                if (isNaN(wt)) return;
-                const x = padding.left + (chartW / Math.max(records.length - 1, 1)) * i;
-                const y = padding.top + chartH - ((wt - minW) / (maxW - minW || 1)) * chartH;
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            });
-            ctx.stroke();
+        const dpr = window.devicePixelRatio || 1;
+        const W = canvas.parentElement.clientWidth - 16;
+        const H = 300;
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, W, H);
 
-            ctx.fillStyle = '#4CAF50';
-            records.forEach((r, i) => {
-                const wt = parseFloat(r.weight);
-                if (isNaN(wt)) return;
-                const x = padding.left + (chartW / Math.max(records.length - 1, 1)) * i;
-                const y = padding.top + chartH - ((wt - minW) / (maxW - minW || 1)) * chartH;
+        if (records.length < 1) {
+            ctx.fillStyle = '#999';
+            ctx.font = '14px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('记录身高体重后显示生长曲线', W/2, H/2);
+            return;
+        }
+
+        const margin = { top: 20, right: 20, bottom: 40, left: 50 };
+        const pw = W - margin.left - margin.right;
+        const ph = H - margin.top - margin.bottom;
+
+        const birthDate = db.baby.birthDate;
+        const points = records
+            .filter(r => r.date && r[chartType])
+            .map(r => ({
+                month: parseFloat(((new Date(r.date) - new Date(birthDate)) / (1000*60*60*24*30.44)).toFixed(1)),
+                value: parseFloat(r[chartType])
+            }))
+            .filter(p => p.month >= 0 && p.value > 0)
+            .sort((a, b) => a.month - b.month);
+
+        if (points.length === 0) {
+            ctx.fillStyle = '#999';
+            ctx.font = '14px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('暂无有效数据', W/2, H/2);
+            return;
+        }
+
+        // WHO 标准曲线数据点
+        let whoPoints = [];
+        let whoMonths = [];
+        if (whoData) {
+            whoMonths = Object.keys(whoData).map(Number).sort((a,b)=>a-b);
+            whoPoints = whoMonths.map(m => ({
+                month: m,
+                p3: whoData[m][chartType].p3,
+                p50: whoData[m][chartType].p50,
+                p97: whoData[m][chartType].p97
+            }));
+        }
+
+        // 计算范围
+        let allVals = points.map(p => p.value);
+        if (whoPoints.length > 0) {
+            allVals = allVals.concat(whoPoints.flatMap(p => [p.p3, p.p50, p.p97]));
+        }
+        const maxVal = Math.ceil(Math.max(...allVals) * 1.1);
+        const minVal = Math.floor(Math.min(...allVals) * 0.9);
+        const maxMonth = Math.max(...points.map(p=>p.month), ...(whoMonths.length>0?whoMonths:[0])) + 2;
+
+        const xScale = (m) => margin.left + (m / maxMonth) * pw;
+        const yScale = (v) => margin.top + ph - ((v - minVal) / (maxVal - minVal)) * ph;
+
+        // 绘制 WHO 标准曲线
+        if (whoPoints.length > 0) {
+            const drawWhoLine = (key, color, dash) => {
                 ctx.beginPath();
-                ctx.arc(x, y, 3, 0, Math.PI * 2);
-                ctx.fill();
-            });
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1.2;
+                ctx.setLineDash(dash);
+                whoPoints.forEach((p, i) => {
+                    const x = xScale(p.month);
+                    const y = yScale(p[key]);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+                ctx.setLineDash([]);
+            };
+            drawWhoLine('p97', 'rgba(200,100,100,0.5)', [4,4]);
+            drawWhoLine('p50', 'rgba(100,150,100,0.6)', [2,2]);
+            drawWhoLine('p3', 'rgba(100,100,200,0.5)', [4,4]);
+        }
+
+        // 绘制宝宝数据
+        ctx.beginPath();
+        ctx.strokeStyle = '#E85D75';
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([]);
+        points.forEach((p, i) => {
+            const x = xScale(p.month);
+            const y = yScale(p.value);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        // 数据点
+        points.forEach(p => {
+            const x = xScale(p.month);
+            const y = yScale(p.value);
+            ctx.beginPath();
+            ctx.fillStyle = '#E85D75';
+            ctx.arc(x, y, 4, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.arc(x, y, 2, 0, Math.PI*2);
+            ctx.fill();
+        });
+
+        // 坐标轴
+        ctx.strokeStyle = '#ddd';
+        ctx.lineWidth = 0.5;
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(margin.left, margin.top);
+        ctx.lineTo(margin.left, margin.top + ph);
+        ctx.lineTo(margin.left + pw, margin.top + ph);
+        ctx.stroke();
+
+        // Y轴刻度
+        ctx.fillStyle = '#999';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'right';
+        for (let i = 0; i <= 4; i++) {
+            const val = minVal + (maxVal - minVal) * i / 4;
+            const y = yScale(val);
+            ctx.fillText(val.toFixed(1), margin.left - 5, y + 3);
+        }
+
+        // X轴刻度（月份）
+        ctx.textAlign = 'center';
+        const step = maxMonth > 24 ? 6 : maxMonth > 12 ? 3 : 2;
+        for (let m = 0; m <= maxMonth; m += step) {
+            const x = xScale(m);
+            ctx.fillText(m + '月', x, margin.top + ph + 18);
         }
 
         // 图例
-        ctx.font = '11px sans-serif';
-        ctx.fillStyle = '#FF8FA3';
-        ctx.fillRect(padding.left, 4, 10, 3);
-        ctx.fillStyle = '#888';
-        ctx.fillText('身高', padding.left + 14, 10);
-        ctx.fillStyle = '#4CAF50';
-        ctx.fillRect(padding.left + 50, 4, 10, 3);
-        ctx.fillStyle = '#888';
-        ctx.fillText('体重', padding.left + 64, 10);
+        const legendY = margin.top - 2;
+        const legends = [
+            { color: '#E85D75', text: '安安', dash: [] },
+            { color: 'rgba(200,100,100,0.5)', text: 'P97', dash: [4,4] },
+            { color: 'rgba(100,150,100,0.6)', text: 'P50', dash: [2,2] },
+            { color: 'rgba(100,100,200,0.5)', text: 'P3', dash: [4,4] }
+        ];
+        let lx = margin.left;
+        legends.forEach(l => {
+            ctx.beginPath();
+            ctx.strokeStyle = l.color;
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash(l.dash);
+            ctx.moveTo(lx, legendY);
+            ctx.lineTo(lx + 15, legendY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#666';
+            ctx.font = '10px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(l.text, lx + 18, legendY + 4);
+            lx += 55;
+        });
+
+        // 标题
+        ctx.fillStyle = '#666';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(chartType === 'height' ? '身高生长曲线 (cm)' : '体重生长曲线 (kg)', W/2, margin.top + ph + 35);
     },
 
     renderGrowthList() {

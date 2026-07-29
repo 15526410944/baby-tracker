@@ -1759,3 +1759,15 @@ input, textarea, select {
     padding: 2px 8px;
     border-radius: 10px;
 }
+
+/* ===== 图表切换按钮 ===== */
+.chart-toggle { display:flex; gap:6px; margin-bottom:8px; }
+.chart-toggle-btn { flex:1; padding:6px; border-radius:8px; font-size:12px; font-weight:600; background:var(--card-bg); color:var(--text-light); box-shadow:var(--shadow); border:none; cursor:pointer; transition:all 0.2s; }
+.chart-toggle-btn.active { background:var(--primary); color:#fff; }
+
+/* ===== 疫苗提醒卡片 ===== */
+.dash-vaccine-card { background:var(--card-bg); border-radius:16px; padding:16px; margin-bottom:14px; box-shadow:var(--shadow); }
+.dash-vaccine-item { display:flex; gap:8px; padding:8px 0; border-bottom:1px solid var(--border); align-items:flex-start; }
+.dash-vaccine-item:last-child { border-bottom:none; }
+.dash-vaccine-dot { width:6px; height:6px; border-radius:50%; margin-top:6px; flex-shrink:0; }
+.dash-vaccine-text { font-size:13px; color:var(--text); line-height:1.5; flex:1; }

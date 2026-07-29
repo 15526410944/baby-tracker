@@ -255,6 +255,9 @@ const App = {
         // 每日推送精选
         this.renderDashPush();
 
+        // 疫苗提醒
+        this.renderVaccineReminder();
+
         // 今日时间线
         this.renderTimeline();
     },
@@ -350,6 +353,35 @@ const App = {
         todoChecks.forEach(cb => { if (cb.checked) done++; });
         const countEl = document.getElementById('todoCount');
         if (countEl) countEl.textContent = `${done}/${todoChecks.length}`;
+    },
+
+    // 疫苗提醒
+    renderVaccineReminder() {
+        const db = Storage.load();
+        if (!db.baby.birthDate) return;
+        if (typeof VaccineSchedule === 'undefined') return;
+        
+        const reminders = VaccineSchedule.getReminders(db.baby.birthDate, db.vaccine || []);
+        const card = document.getElementById('dashVaccineCard');
+        const list = document.getElementById('dashVaccineList');
+        
+        if (!card || !list) return;
+        
+        if (reminders.length === 0) {
+            card.style.display = 'none';
+            return;
+        }
+        
+        card.style.display = 'block';
+        list.innerHTML = reminders.map(v => `
+            <div class="dash-vaccine-item">
+                <span class="dash-vaccine-dot" style="background:#E85D75"></span>
+                <div class="dash-vaccine-text">
+                    <strong>${v.name}</strong> 第${v.dose}剂
+                    <span class="dash-push-tag">${v.desc}</span>
+                </div>
+            </div>
+        `).join('');
     },
 
     renderTimeline() {
@@ -1239,107 +1271,203 @@ const App = {
 
     drawGrowthChart(records) {
         const canvas = document.getElementById('growthChart');
-        const ctx = canvas.getContext('2d');
-        const dpr = window.devicePixelRatio || 1;
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        ctx.scale(dpr, dpr);
-
-        const w = rect.width;
-        const h = rect.height;
-        const padding = { top: 20, right: 20, bottom: 30, left: 35 };
-        const chartW = w - padding.left - padding.right;
-        const chartH = h - padding.top - padding.bottom;
-
-        ctx.clearRect(0, 0, w, h);
-
-        if (records.length === 0) return;
-
-        const heights = records.map(r => parseFloat(r.height)).filter(v => !isNaN(v));
-        const weights = records.map(r => parseFloat(r.weight)).filter(v => !isNaN(v));
-
-        if (heights.length === 0 && weights.length === 0) return;
-
-        const minH = Math.min(...heights) * 0.9;
-        const maxH = Math.max(...heights) * 1.1;
-        const minW = Math.min(...weights) * 0.9;
-        const maxW = Math.max(...weights) * 1.1;
-
-        // 绘制坐标轴
-        ctx.strokeStyle = '#eee';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(padding.left, padding.top);
-        ctx.lineTo(padding.left, h - padding.bottom);
-        ctx.lineTo(w - padding.right, h - padding.bottom);
-        ctx.stroke();
-
-        // 绘制身高曲线
-        if (heights.length > 0) {
-            ctx.strokeStyle = '#FF8FA3';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            records.forEach((r, i) => {
-                const h = parseFloat(r.height);
-                if (isNaN(h)) return;
-                const x = padding.left + (chartW / Math.max(records.length - 1, 1)) * i;
-                const y = padding.top + chartH - ((h - minH) / (maxH - minH || 1)) * chartH;
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
+        if (!canvas) return;
+        
+        const db = Storage.load();
+        const gender = db.baby.gender || 'girl';
+        const whoData = (typeof WhoGrowth !== 'undefined') ? (WhoGrowth[gender] || WhoGrowth.girl) : null;
+        
+        let chartType = canvas.dataset.chartType || 'height';
+        const container = canvas.parentElement;
+        let toggleBar = container.querySelector('.chart-toggle');
+        if (!toggleBar) {
+            toggleBar = document.createElement('div');
+            toggleBar.className = 'chart-toggle';
+            toggleBar.innerHTML = '<button class="chart-toggle-btn '+(chartType==='height'?'active':'')+'" data-type="height">📏 身高</button><button class="chart-toggle-btn '+(chartType==='weight'?'active':'')+'" data-type="weight">⚖️ 体重</button>';
+            container.insertBefore(toggleBar, canvas);
+            toggleBar.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    canvas.dataset.chartType = e.target.dataset.type;
+                    this.drawGrowthChart(records);
+                });
             });
-            ctx.stroke();
-
-            // 绘制点
-            ctx.fillStyle = '#FF8FA3';
-            records.forEach((r, i) => {
-                const h = parseFloat(r.height);
-                if (isNaN(h)) return;
-                const x = padding.left + (chartW / Math.max(records.length - 1, 1)) * i;
-                const y = padding.top + chartH - ((h - minH) / (maxH - minH || 1)) * chartH;
-                ctx.beginPath();
-                ctx.arc(x, y, 3, 0, Math.PI * 2);
-                ctx.fill();
+        } else {
+            toggleBar.querySelectorAll('button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.type === chartType);
             });
         }
 
-        // 绘制体重曲线
-        if (weights.length > 0) {
-            ctx.strokeStyle = '#B5EAD7';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            records.forEach((r, i) => {
-                const wt = parseFloat(r.weight);
-                if (isNaN(wt)) return;
-                const x = padding.left + (chartW / Math.max(records.length - 1, 1)) * i;
-                const y = padding.top + chartH - ((wt - minW) / (maxW - minW || 1)) * chartH;
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            });
-            ctx.stroke();
+        const dpr = window.devicePixelRatio || 1;
+        const W = canvas.parentElement.clientWidth - 16;
+        const H = 300;
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, W, H);
 
-            ctx.fillStyle = '#4CAF50';
-            records.forEach((r, i) => {
-                const wt = parseFloat(r.weight);
-                if (isNaN(wt)) return;
-                const x = padding.left + (chartW / Math.max(records.length - 1, 1)) * i;
-                const y = padding.top + chartH - ((wt - minW) / (maxW - minW || 1)) * chartH;
+        if (records.length < 1) {
+            ctx.fillStyle = '#999';
+            ctx.font = '14px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('记录身高体重后显示生长曲线', W/2, H/2);
+            return;
+        }
+
+        const margin = { top: 20, right: 20, bottom: 40, left: 50 };
+        const pw = W - margin.left - margin.right;
+        const ph = H - margin.top - margin.bottom;
+
+        const birthDate = db.baby.birthDate;
+        const points = records
+            .filter(r => r.date && r[chartType])
+            .map(r => ({
+                month: parseFloat(((new Date(r.date) - new Date(birthDate)) / (1000*60*60*24*30.44)).toFixed(1)),
+                value: parseFloat(r[chartType])
+            }))
+            .filter(p => p.month >= 0 && p.value > 0)
+            .sort((a, b) => a.month - b.month);
+
+        if (points.length === 0) {
+            ctx.fillStyle = '#999';
+            ctx.font = '14px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('暂无有效数据', W/2, H/2);
+            return;
+        }
+
+        // WHO 标准曲线数据点
+        let whoPoints = [];
+        let whoMonths = [];
+        if (whoData) {
+            whoMonths = Object.keys(whoData).map(Number).sort((a,b)=>a-b);
+            whoPoints = whoMonths.map(m => ({
+                month: m,
+                p3: whoData[m][chartType].p3,
+                p50: whoData[m][chartType].p50,
+                p97: whoData[m][chartType].p97
+            }));
+        }
+
+        // 计算范围
+        let allVals = points.map(p => p.value);
+        if (whoPoints.length > 0) {
+            allVals = allVals.concat(whoPoints.flatMap(p => [p.p3, p.p50, p.p97]));
+        }
+        const maxVal = Math.ceil(Math.max(...allVals) * 1.1);
+        const minVal = Math.floor(Math.min(...allVals) * 0.9);
+        const maxMonth = Math.max(...points.map(p=>p.month), ...(whoMonths.length>0?whoMonths:[0])) + 2;
+
+        const xScale = (m) => margin.left + (m / maxMonth) * pw;
+        const yScale = (v) => margin.top + ph - ((v - minVal) / (maxVal - minVal)) * ph;
+
+        // 绘制 WHO 标准曲线
+        if (whoPoints.length > 0) {
+            const drawWhoLine = (key, color, dash) => {
                 ctx.beginPath();
-                ctx.arc(x, y, 3, 0, Math.PI * 2);
-                ctx.fill();
-            });
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1.2;
+                ctx.setLineDash(dash);
+                whoPoints.forEach((p, i) => {
+                    const x = xScale(p.month);
+                    const y = yScale(p[key]);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+                ctx.setLineDash([]);
+            };
+            drawWhoLine('p97', 'rgba(200,100,100,0.5)', [4,4]);
+            drawWhoLine('p50', 'rgba(100,150,100,0.6)', [2,2]);
+            drawWhoLine('p3', 'rgba(100,100,200,0.5)', [4,4]);
+        }
+
+        // 绘制宝宝数据
+        ctx.beginPath();
+        ctx.strokeStyle = '#E85D75';
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([]);
+        points.forEach((p, i) => {
+            const x = xScale(p.month);
+            const y = yScale(p.value);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        // 数据点
+        points.forEach(p => {
+            const x = xScale(p.month);
+            const y = yScale(p.value);
+            ctx.beginPath();
+            ctx.fillStyle = '#E85D75';
+            ctx.arc(x, y, 4, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.arc(x, y, 2, 0, Math.PI*2);
+            ctx.fill();
+        });
+
+        // 坐标轴
+        ctx.strokeStyle = '#ddd';
+        ctx.lineWidth = 0.5;
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(margin.left, margin.top);
+        ctx.lineTo(margin.left, margin.top + ph);
+        ctx.lineTo(margin.left + pw, margin.top + ph);
+        ctx.stroke();
+
+        // Y轴刻度
+        ctx.fillStyle = '#999';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'right';
+        for (let i = 0; i <= 4; i++) {
+            const val = minVal + (maxVal - minVal) * i / 4;
+            const y = yScale(val);
+            ctx.fillText(val.toFixed(1), margin.left - 5, y + 3);
+        }
+
+        // X轴刻度（月份）
+        ctx.textAlign = 'center';
+        const step = maxMonth > 24 ? 6 : maxMonth > 12 ? 3 : 2;
+        for (let m = 0; m <= maxMonth; m += step) {
+            const x = xScale(m);
+            ctx.fillText(m + '月', x, margin.top + ph + 18);
         }
 
         // 图例
-        ctx.font = '11px sans-serif';
-        ctx.fillStyle = '#FF8FA3';
-        ctx.fillRect(padding.left, 4, 10, 3);
-        ctx.fillStyle = '#888';
-        ctx.fillText('身高', padding.left + 14, 10);
-        ctx.fillStyle = '#4CAF50';
-        ctx.fillRect(padding.left + 50, 4, 10, 3);
-        ctx.fillStyle = '#888';
-        ctx.fillText('体重', padding.left + 64, 10);
+        const legendY = margin.top - 2;
+        const legends = [
+            { color: '#E85D75', text: '安安', dash: [] },
+            { color: 'rgba(200,100,100,0.5)', text: 'P97', dash: [4,4] },
+            { color: 'rgba(100,150,100,0.6)', text: 'P50', dash: [2,2] },
+            { color: 'rgba(100,100,200,0.5)', text: 'P3', dash: [4,4] }
+        ];
+        let lx = margin.left;
+        legends.forEach(l => {
+            ctx.beginPath();
+            ctx.strokeStyle = l.color;
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash(l.dash);
+            ctx.moveTo(lx, legendY);
+            ctx.lineTo(lx + 15, legendY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#666';
+            ctx.font = '10px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(l.text, lx + 18, legendY + 4);
+            lx += 55;
+        });
+
+        // 标题
+        ctx.fillStyle = '#666';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(chartType === 'height' ? '身高生长曲线 (cm)' : '体重生长曲线 (kg)', W/2, margin.top + ph + 35);
     },
 
     renderGrowthList() {
