@@ -7,19 +7,19 @@
 }
 
 :root {
-    --primary: #D4A574;
-    --primary-light: #E8D5C0;
-    --primary-dark: #C4956A;
-    --secondary: #F5EDE4;
-    --accent: #D4A574;
-    --bg: #FAF5EF;
+    --primary: #E8A0B4;
+    --primary-light: #F5D0DA;
+    --primary-dark: #D4859A;
+    --secondary: #FBF0E8;
+    --accent: #E8A0B4;
+    --bg: #FBF5F0;
     --card-bg: #FFFDF9;
     --text: #4A3F35;
     --text-light: #8B7E6E;
     --text-lighter: #B8A99A;
-    --border: #EDE3D6;
-    --shadow: 0 2px 12px rgba(180, 150, 120, 0.08);
-    --shadow-hover: 0 4px 20px rgba(180, 150, 120, 0.15);
+    --border: #F0E3D8;
+    --shadow: 0 2px 12px rgba(200, 150, 150, 0.08);
+    --shadow-hover: 0 4px 20px rgba(200, 150, 150, 0.15);
     --radius: 16px;
     --radius-sm: 10px;
     --header-h: 80px;
@@ -83,7 +83,7 @@ input, textarea, select {
     top: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(245, 237, 228, 0.7) 0%, rgba(235, 225, 210, 0.7) 100%);
+    background: linear-gradient(135deg, rgba(245, 237, 228, 0.65) 0%, rgba(240, 225, 220, 0.65) 100%);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     z-index: -1;
@@ -846,7 +846,7 @@ input, textarea, select {
     top: 0;
     bottom: 0;
     width: 64px;
-    background: linear-gradient(180deg, rgba(245, 237, 228, 0.7) 0%, rgba(235, 225, 210, 0.7) 100%);
+    background: linear-gradient(180deg, rgba(245, 237, 228, 0.65) 0%, rgba(240, 225, 220, 0.65) 100%);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     display: flex;
