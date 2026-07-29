@@ -79,6 +79,45 @@ const App = {
         // 清空今日时间线
         document.getElementById('clearTodayTimeline').addEventListener('click', () => this.clearTodayTimeline());
 
+        // 全局搜索
+        const searchInput = document.getElementById('globalSearch');
+        if (searchInput) {
+            let searchTimer = null;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimer);
+                const query = e.target.value.trim();
+                const resultsEl = document.getElementById('searchResults');
+                if (query.length < 2) {
+                    if (resultsEl) resultsEl.style.display = 'none';
+                    return;
+                }
+                searchTimer = setTimeout(() => {
+                    const results = this.searchRecords(query);
+                    if (results.length === 0) {
+                        resultsEl.innerHTML = '<div class="search-result-item"><span class="search-result-icon">🔍</span><div class="search-result-info"><div class="search-result-title">未找到相关记录</div></div></div>';
+                    } else {
+                        resultsEl.innerHTML = results.map(r => `
+                            <div class="search-result-item" onclick="App.goToSearchResult('${r.type}')">
+                                <span class="search-result-icon">${r.icon}</span>
+                                <div class="search-result-info">
+                                    <div class="search-result-title">${this.escape(r.title)}</div>
+                                    <div class="search-result-date">${Utils.formatDateFull(r.date)}</div>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                    resultsEl.style.display = 'block';
+                }, 300);
+            });
+            // 点击外部隐藏搜索结果
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.dash-search-bar')) {
+                    const resultsEl = document.getElementById('searchResults');
+                    if (resultsEl) resultsEl.style.display = 'none';
+                }
+            });
+        }
+
         // 宝宝信息 - 点击仪表盘头像区域
         const dashAvatarSection = document.querySelector('.dash-avatar-section');
         if (dashAvatarSection) {
@@ -1564,6 +1603,11 @@ const App = {
                     <div class="diary-mood">${moodMap[r.mood] || '📝'}</div>
                 </div>
                 <div class="diary-content">${this.escape(r.content || '')}</div>
+                ${r.images && r.images.length > 0 ? `
+                    <div class="diary-images" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px">
+                        ${r.images.map(img => `<div class="diary-image" style="aspect-ratio:1;border-radius:8px;overflow:hidden;cursor:pointer" onclick="App.viewDiaryImage('${img.replace(/'/g, "\\'")}')}"><img src="${img}" style="width:100%;height:100%;object-fit:cover"></div>`).join('')}
+                    </div>
+                ` : ''}
                 <div class="record-actions">
                     <button class="record-edit" onclick="App.editRecord('diary','${r.id}')">✏️</button>
                     <button class="record-delete" onclick="App.deleteRecord('diary','${r.id}')">🗑</button>
@@ -1776,7 +1820,9 @@ const App = {
             </div>
             <div class="settings-section">
                 <div class="settings-section-title">数据管理</div>
+                ${this.checkBackupReminder() ? '<div class="backup-reminder">⚠️ 已超过7天未备份数据，建议及时导出备份</div>' : ''}
                 <button class="add-btn" onclick="App.exportData()" style="background:#B5EAD7;color:#333">📤 导出数据</button>
+                <button class="add-btn" onclick="App.exportReport()" style="background:#FFD6E0;color:#333">📋 生成成长报告</button>
                 <button class="add-btn" onclick="App.importData()" style="background:#C7CEEA;color:#333">📥 导入数据</button>
                 <button class="danger-btn" onclick="App.clearAllData()">🗑 清空所有数据</button>
             </div>
@@ -1836,6 +1882,7 @@ const App = {
         a.download = `baby-tracker-${Utils.todayStr()}.json`;
         a.click();
         URL.revokeObjectURL(url);
+        this.updateBackupDate();
         this.toast('数据已导出');
     },
 
@@ -2698,24 +2745,92 @@ const App = {
             </div>
             <div class="form-group">
                 <label class="form-label">日记内容</label>
-                <textarea class="form-textarea" id="diaryContent" style="min-height:150px" placeholder="记录宝宝今天的故事..."></textarea>
+                <textarea class="form-textarea" id="diaryContent" style="min-height:120px" placeholder="记录宝宝今天的故事..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">📷 添加照片（最多9张）</label>
+                <button type="button" class="add-btn" id="diaryPhotoBtn" style="margin-bottom:8px">📷 选择照片</button>
+                <input type="file" id="diaryPhotoInput" accept="image/*" multiple style="display:none">
+                <div class="diary-photo-preview" id="diaryPhotoPreview" style="display:none"></div>
             </div>
         `;
 
         this.showModal('写日记', body, () => {
             const content = this.val('diaryContent');
             if (!content) { this.toast('请输入日记内容'); return false; }
+            const images = window._diaryPhotos || [];
             Storage.add('diary', {
                 date: document.getElementById('diaryDate').value,
                 time: document.getElementById('diaryTime').value,
                 mood: this.getMultiChipValues('diaryMoodChips'),
-                content
+                content,
+                images
             });
+            window._diaryPhotos = [];
             this.renderDiary();
+            this.renderDashboard();
             this.toast('日记已保存');
         });
 
         this.bindChips('diaryMoodChips');
+
+        // 照片上传逻辑
+        window._diaryPhotos = [];
+        setTimeout(() => {
+            const photoBtn = document.getElementById('diaryPhotoBtn');
+            const photoInput = document.getElementById('diaryPhotoInput');
+            const preview = document.getElementById('diaryPhotoPreview');
+
+            if (photoBtn && photoInput) {
+                photoBtn.addEventListener('click', () => photoInput.click());
+                photoInput.addEventListener('change', (e) => {
+                    const files = Array.from(e.target.files);
+                    files.forEach(file => {
+                        if (file.size > 2 * 1024 * 1024) {
+                            this.toast(`图片 ${file.name} 超过2MB，已跳过`);
+                            return;
+                        }
+                        if (window._diaryPhotos.length >= 9) {
+                            this.toast('最多9张照片');
+                            return;
+                        }
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            window._diaryPhotos.push(ev.target.result);
+                            this.renderDiaryPhotoPreview();
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                    photoInput.value = '';
+                });
+            }
+        }, 100);
+    },
+
+    renderDiaryPhotoPreview() {
+        const preview = document.getElementById('diaryPhotoPreview');
+        if (!preview) return;
+        const photos = window._diaryPhotos || [];
+        if (photos.length === 0) {
+            preview.style.display = 'none';
+            return;
+        }
+        preview.style.display = 'grid';
+        preview.style.gridTemplateColumns = 'repeat(3, 1fr)';
+        preview.style.gap = '6px';
+        preview.innerHTML = photos.map((src, i) => `
+            <div style="position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden">
+                <img src="${src}" style="width:100%;height:100%;object-fit:cover">
+                <button type="button" onclick="App.removeDiaryPhoto(${i})" style="position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.5);color:#fff;border:none;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer">✕</button>
+            </div>
+        `).join('');
+    },
+
+    removeDiaryPhoto(index) {
+        if (window._diaryPhotos) {
+            window._diaryPhotos.splice(index, 1);
+            this.renderDiaryPhotoPreview();
+        }
     },
 
     // ===== 辅助方法 =====
@@ -2929,6 +3044,149 @@ const App = {
         const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
+    },
+
+    // ===== 全局搜索 =====
+    searchRecords(query) {
+        const db = Storage.load();
+        const results = [];
+        const q = query.toLowerCase();
+
+        (db.diary || []).forEach(r => {
+            if ((r.content || '').toLowerCase().includes(q)) {
+                results.push({ type: 'diary', icon: '📝', title: r.content.slice(0, 40), date: r.date, id: r.id });
+            }
+        });
+        (db.medical || []).forEach(r => {
+            const text = (r.symptom || '') + (r.diagnosis || '') + (r.hospital || '') + (r.note || '');
+            if (text.toLowerCase().includes(q)) {
+                results.push({ type: 'health', icon: '🏥', title: (r.hospital || '就医') + ' - ' + (r.diagnosis || r.symptom || ''), date: r.date, id: r.id });
+            }
+        });
+        (db.shopping || []).forEach(r => {
+            const text = (r.item || '') + (r.note || '') + (r.category || '');
+            if (text.toLowerCase().includes(q)) {
+                results.push({ type: 'shopping', icon: '🛒', title: r.item + ' ¥' + (r.price || 0), date: r.date, id: r.id });
+            }
+        });
+        (db.milestone || []).forEach(r => {
+            const text = (r.title || '') + (r.note || '');
+            if (text.toLowerCase().includes(q)) {
+                results.push({ type: 'growth', icon: '⭐', title: r.title || '里程碑', date: r.date, id: r.id });
+            }
+        });
+
+        return results.slice(0, 20).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    },
+
+    goToSearchResult(type) {
+        document.getElementById('searchResults').style.display = 'none';
+        const searchInput = document.getElementById('globalSearch');
+        if (searchInput) searchInput.value = '';
+        this.switchPage(type);
+    },
+
+    viewDiaryImage(src) {
+        this.showModal('照片', `<div style="text-align:center"><img src="${src}" style="max-width:100%;max-height:70vh;border-radius:12px"></div>`, null);
+        document.getElementById('modalCancel').style.display = 'none';
+        document.getElementById('modalConfirm').textContent = '关闭';
+    },
+
+    // ===== 数据备份提醒 =====
+    checkBackupReminder() {
+        const db = Storage.load();
+        const lastBackup = db.settings.lastBackupDate;
+        if (!lastBackup) return true;
+        const days = (Date.now() - new Date(lastBackup).getTime()) / (1000 * 60 * 60 * 24);
+        return days > 7;
+    },
+
+    updateBackupDate() {
+        Storage.updateSettings({ lastBackupDate: new Date().toISOString() });
+    },
+
+    exportReport() {
+        const db = Storage.load();
+        const baby = db.baby || {};
+        const age = baby.birthDate ? Utils.calcAge(baby.birthDate) : '';
+        const growth = (db.growth || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+        const vaccines = (db.vaccine || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+        const milestones = (db.milestone || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+        const shoppings = (db.shopping || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        let totalShopping = 0;
+        shoppings.forEach(s => totalShopping += parseFloat(s.price) || 0);
+
+        const html = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><title>${baby.name || '宝宝'}成长报告</title>
+<style>
+body{font-family:-apple-system,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#333}
+h1{color:#E891A6;text-align:center}
+h2{color:#D4859A;border-bottom:2px solid #FBF2F0;padding-bottom:6px;margin-top:24px}
+.card{background:#FBF5F0;border-radius:12px;padding:14px;margin:8px 0}
+.stat{display:inline-block;margin-right:20px;text-align:center}
+.stat-val{font-size:24px;font-weight:700;color:#E891A6}
+.stat-lbl{font-size:12px;color:#888}
+table{width:100%;border-collapse:collapse;margin:8px 0}
+td,th{padding:6px 8px;text-align:left;border-bottom:1px solid #eee;font-size:13px}
+</style></head>
+<body>
+<h1>${baby.avatar || '👶'} ${baby.name || '宝宝'}成长报告</h1>
+<p style="text-align:center;color:#888">${age} · 生成于 ${new Date().toLocaleDateString('zh-CN')}</p>
+
+<h2>📊 基本信息</h2>
+<div class="card">
+姓名：${baby.name || '未设置'}<br>
+性别：${baby.gender === 'boy' ? '男' : baby.gender === 'girl' ? '女' : '未设置'}<br>
+出生日期：${baby.birthDate || '未设置'}<br>
+年龄：${age}
+</div>
+
+<h2>📏 最新生长数据</h2>
+<div class="card">
+${growth.length > 0 ? `
+身高：${growth[0].height || '-'} cm<br>
+体重：${growth[0].weight || '-'} kg<br>
+头围：${growth[0].headCircumference || '-'} cm<br>
+记录日期：${growth[0].date}
+` : '暂无记录'}
+</div>
+
+<h2>💉 疫苗接种记录</h2>
+<table>
+<tr><th>日期</th><th>疫苗</th><th>剂次</th></tr>
+${vaccines.map(v => `<tr><td>${v.date}</td><td>${v.vaccineName || ''}</td><td>${v.dose || ''}</td></tr>`).join('') || '<tr><td colspan="3">暂无记录</td></tr>'}
+</table>
+
+<h2>⭐ 发育里程碑</h2>
+<div class="card">
+${milestones.map(m => `<div>📅 ${m.date} - <strong>${m.title || ''}</strong> ${m.note || ''}</div>`).join('') || '暂无记录'}
+</div>
+
+<h2>💰 购物消费统计</h2>
+<div class="card">
+<div class="stat"><div class="stat-val">${shoppings.length}</div><div class="stat-lbl">总购物数</div></div>
+<div class="stat"><div class="stat-val">¥${totalShopping.toFixed(0)}</div><div class="stat-lbl">总花费</div></div>
+</div>
+
+<h2>📝 最近日记</h2>
+<div class="card">
+${(db.diary || []).slice(0, 5).map(d => `<div style="margin-bottom:8px"><strong>${d.date}</strong> ${d.content.slice(0, 60)}...</div>`).join('') || '暂无记录'}
+</div>
+
+<p style="text-align:center;color:#ccc;margin-top:30px">宝宝成长记 · 用心记录每一刻 ❤️</p>
+</body></html>`;
+
+        const blob = new Blob([html], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${baby.name || '宝宝'}成长报告-${Utils.todayStr()}.html`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.updateBackupDate();
+        this.toast('成长报告已生成');
     }
 };
 
