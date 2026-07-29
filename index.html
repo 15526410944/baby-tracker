@@ -2365,10 +2365,13 @@ const Storage = {
     // 保存数据库
     save(db) {
         try {
-            localStorage.setItem(this.DB_KEY, JSON.stringify(db));
+            const data = JSON.stringify(db);
+            localStorage.setItem(this.DB_KEY, data);
+            return true;
         } catch (e) {
             console.error('数据保存失败', e);
-            alert('存储空间不足，请清理旧数据');
+            alert('⚠️ 存储空间不足！\\n\\n可能是照片太多导致超限。\\n建议：\\n1. 减少日记照片数量\\n2. 导出数据备份后清理\\n3. 每张照片建议不超过500KB');
+            return false;
         }
     },
 
@@ -6093,20 +6096,31 @@ const App = {
                 photoInput.addEventListener('change', (e) => {
                     const files = Array.from(e.target.files);
                     files.forEach(file => {
-                        if (file.size > 2 * 1024 * 1024) {
-                            this.toast(`图片 ${file.name} 超过2MB，已跳过`);
+                        if (file.size > 5 * 1024 * 1024) {
+                            this.toast(`图片 ${file.name} 太大，已跳过`);
                             return;
                         }
                         if (window._diaryPhotos.length >= 9) {
                             this.toast('最多9张照片');
                             return;
                         }
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                            window._diaryPhotos.push(ev.target.result);
+                        // 压缩图片
+                        const img = new Image();
+                        const url = URL.createObjectURL(file);
+                        img.onload = () => {
+                            URL.revokeObjectURL(url);
+                            const canvas = document.createElement('canvas');
+                            const maxW = 800;
+                            const scale = Math.min(1, maxW / img.width);
+                            canvas.width = img.width * scale;
+                            canvas.height = img.height * scale;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            const compressed = canvas.toDataURL('image/jpeg', 0.6);
+                            window._diaryPhotos.push(compressed);
                             this.renderDiaryPhotoPreview();
                         };
-                        reader.readAsDataURL(file);
+                        img.src = url;
                     });
                     photoInput.value = '';
                 });
