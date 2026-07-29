@@ -868,6 +868,27 @@ input, textarea, select {
     padding: 16px 0 12px;
     z-index: 100;
     box-shadow: 2px 0 12px rgba(180, 130, 140, 0.15);
+    color: #888;
+}
+
+.nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    color: #999;
+    transition: all 0.2s;
+    padding: 6px;
+    border-radius: 12px;
+    width: 52px;
+    height: auto;
+    min-height: 44px;
+}
+
+.nav-btn.active {
+    color: #fff;
+    background: rgba(255,255,255,0.3);
 }
 
 .sidebar-menu {
@@ -886,26 +907,6 @@ input, textarea, select {
     width: 40px;
     display: flex;
     justify-content: center;
-}
-
-.nav-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    color: rgba(255,255,255,0.5);
-    transition: all 0.2s;
-    padding: 6px;
-    border-radius: 12px;
-    width: 52px;
-    height: auto;
-    min-height: 44px;
-}
-
-.nav-btn.active {
-    color: #fff;
-    background: rgba(255,255,255,0.25);
 }
 
 .nav-btn:active {
@@ -1321,7 +1322,7 @@ input, textarea, select {
             <!-- 顶部状态栏 - 极简设计 -->
             <header class="app-header">
                 <div class="header-content">
-                    <div class="header-logo">宝宝成长记</div>
+                    <div class="header-logo">安安成长工作台</div>
                 </div>
             </header>
 
