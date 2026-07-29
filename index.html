@@ -823,6 +823,12 @@ input, textarea, select {
     font-size: 12px;
     color: var(--text-light);
 }
+.growth-stat-range {
+    font-size: 10px;
+    color: #999;
+    margin-top: 4px;
+    line-height: 1.3;
+}
 
 .chart-container {
     background: var(--card-bg);
@@ -830,7 +836,7 @@ input, textarea, select {
     padding: 12px;
     box-shadow: var(--shadow);
     margin-bottom: 12px;
-    height: 180px;
+    min-height: 180px;
 }
 
 .chart-container canvas {
@@ -1786,30 +1792,57 @@ input, textarea, select {
 .dash-vaccine-text { font-size:13px; color:var(--text); line-height:1.5; flex:1; }
 
 /* ===== 成长页面子标签 ===== */
-.growth-nav {
+.growth-layout {
     display: flex;
-    gap: 4px;
-    overflow-x: auto;
-    padding: 0 0 12px;
-    flex-wrap: wrap;
+    gap: 12px;
+    min-height: 0;
 }
-.growth-tab {
+.growth-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 56px;
     flex-shrink: 0;
-    padding: 6px 14px;
-    border-radius: 16px;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-light);
+    padding-top: 8px;
+}
+.growth-nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 8px 4px;
+    border-radius: 12px;
     background: var(--card-bg);
     box-shadow: var(--shadow);
     transition: all 0.2s;
-    white-space: nowrap;
+    min-height: 52px;
     cursor: pointer;
     border: none;
+    font-family: inherit;
 }
-.growth-tab.active {
+.growth-nav-btn.active {
     background: var(--primary);
     color: #fff;
+    box-shadow: var(--shadow-hover);
+}
+.growth-nav-icon {
+    font-size: 18px;
+    line-height: 1;
+}
+.growth-nav-label {
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--text-light);
+}
+.growth-nav-btn.active .growth-nav-label {
+    color: #fff;
+}
+.growth-content {
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
 }
 .growth-section {
     display: none;
@@ -1994,9 +2027,10 @@ input, textarea, select {
                 </div>
 
                 <!-- 疫苗提醒 -->
-                <div class="dash-vaccine-card" id="dashVaccineCard" style="display:none">
-                    <div class="dash-push-header">
-                        <div class="dash-push-title">💉 疫苗提醒</div>
+                <div class="dash-vaccine-card" id="dashVaccineCard" style="display:block">
+                    <div class="dash-push-header" style="cursor:pointer" onclick="App.showVaccineManager()">
+                        <div class="dash-push-title">💉 疫苗计划</div>
+                        <span style="font-size:11px;color:var(--primary)">管理 ›</span>
                     </div>
                     <div class="dash-vaccine-list" id="dashVaccineList"></div>
                 </div>
@@ -2108,13 +2142,26 @@ input, textarea, select {
             <section class="page" id="page-growth">
                 <div class="section-title">成长发育</div>
 
-                <!-- 成长子标签 -->
-                <div class="growth-nav">
-                    <button class="growth-tab active" data-gtab="growth">📏 身高体重</button>
-                    <button class="growth-tab" data-gtab="milestone">⭐ 里程碑</button>
-                    <button class="growth-tab" data-gtab="motor">🏃 运动</button>
-                    <button class="growth-tab" data-gtab="timeline">🕐 时间轴</button>
-                </div>
+                <div class="growth-layout">
+                    <div class="growth-sidebar">
+                        <button class="growth-nav-btn active" data-gtab="growth">
+                            <span class="growth-nav-icon">📏</span>
+                            <span class="growth-nav-label">身高体重</span>
+                        </button>
+                        <button class="growth-nav-btn" data-gtab="milestone">
+                            <span class="growth-nav-icon">⭐</span>
+                            <span class="growth-nav-label">里程碑</span>
+                        </button>
+                        <button class="growth-nav-btn" data-gtab="motor">
+                            <span class="growth-nav-icon">🏃</span>
+                            <span class="growth-nav-label">运动</span>
+                        </button>
+                        <button class="growth-nav-btn" data-gtab="timeline">
+                            <span class="growth-nav-icon">🕐</span>
+                            <span class="growth-nav-label">时间轴</span>
+                        </button>
+                    </div>
+                    <div class="growth-content">
 
                 <!-- 身高体重 -->
                 <div class="growth-section active" id="gtab-growth">
@@ -2141,6 +2188,9 @@ input, textarea, select {
                 <!-- 成长时间轴 -->
                 <div class="growth-section" id="gtab-timeline">
                     <div class="timeline-list" id="growthTimelineList"></div>
+                </div>
+
+                    </div>
                 </div>
             </section>
 
@@ -2948,41 +2998,26 @@ const WhoGrowth = {
  * 中国免疫规划疫苗程序表
  * 来源: 中国国家免疫规划
  */
-const VaccineSchedule = [
-    { name: '乙肝疫苗', dose: 1, month: 0, desc: '出生24小时内' },
-    { name: '卡介苗', dose: 1, month: 0, desc: '出生后尽早' },
-    { name: '乙肝疫苗', dose: 2, month: 1, desc: '满月' },
-    { name: '脊灰疫苗', dose: 1, month: 2, desc: '2月龄' },
-    { name: '脊灰疫苗', dose: 2, month: 3, desc: '3月龄' },
-    { name: '百白破', dose: 1, month: 3, desc: '3月龄' },
-    { name: '脊灰疫苗', dose: 3, month: 4, desc: '4月龄' },
-    { name: '百白破', dose: 2, month: 4, desc: '4月龄' },
-    { name: '百白破', dose: 3, month: 5, desc: '5月龄' },
-    { name: '乙肝疫苗', dose: 3, month: 6, desc: '6月龄' },
-    { name: 'A群流脑', dose: 1, month: 6, desc: '6月龄' },
-    { name: '麻腮风', dose: 1, month: 8, desc: '8月龄' },
-    { name: '乙脑减毒活疫苗', dose: 1, month: 8, desc: '8月龄' },
-    { name: 'A群流脑', dose: 2, month: 9, desc: '9月龄' },
-    { name: '水痘疫苗', dose: 1, month: 12, desc: '12月龄（自费推荐）' },
-    { name: '麻腮风', dose: 2, month: 18, desc: '18月龄' },
-    { name: '甲肝减毒活疫苗', dose: 1, month: 18, desc: '18月龄' },
-    { name: '百白破', dose: 4, month: 18, desc: '18月龄（加强）' },
-    { name: '乙脑减毒活疫苗', dose: 2, month: 24, desc: '2岁' },
-];
+const VaccineSchedule = {
+    // 根据自定义疫苗列表计算提醒
+    getReminders(vaccineList) {
+        if (!vaccineList || vaccineList.length === 0) return [];
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const weekLater = new Date(today);
+        weekLater.setDate(weekLater.getDate() + 7);
 
-VaccineSchedule.getReminders = function(birthDate, vaccinated) {
-    if (!birthDate) return [];
-    const months = Math.floor((new Date() - new Date(birthDate)) / (1000*60*60*24*30.44));
-    const nextMonth = months + 1;
-    
-    return this.filter(v => {
-        if (v.month > nextMonth || v.month < months - 1) return false;
-        const already = vaccinated.some(vac => 
-            vac.vaccineName && vac.vaccineName.includes(v.name) && 
-            (!vac.dose || vac.dose.includes(String(v.dose)) || v.dose === 1)
-        );
-        return !already;
-    });
+        return vaccineList
+            .filter(v => !v.completed)
+            .map(v => {
+                const planDate = new Date(v.planDate);
+                planDate.setHours(0,0,0,0);
+                const diffDays = Math.floor((planDate - today) / (1000*60*60*24));
+                return { ...v, planDateObj: planDate, diffDays };
+            })
+            .sort((a, b) => a.diffDays - b.diffDays)
+            .slice(0, 6); // 最多显示6条
+    }
 };
 
 /**
@@ -3136,7 +3171,7 @@ const App = {
         });
 
         // 成长tab切换
-        document.querySelectorAll('.growth-tab').forEach(tab => {
+        document.querySelectorAll('.growth-nav-btn').forEach(tab => {
             tab.addEventListener('click', () => this.switchGrowthTab(tab.dataset.gtab));
         });
 
@@ -3386,33 +3421,147 @@ const App = {
         if (countEl) countEl.textContent = `${done}/${todoChecks.length}`;
     },
 
-    // 疫苗提醒
+    // 疫苗提醒（自定义疫苗管理）
     renderVaccineReminder() {
         const db = Storage.load();
-        if (!db.baby.birthDate) return;
-        if (typeof VaccineSchedule === 'undefined') return;
-        
-        const reminders = VaccineSchedule.getReminders(db.baby.birthDate, db.vaccine || []);
         const card = document.getElementById('dashVaccineCard');
         const list = document.getElementById('dashVaccineList');
-        
         if (!card || !list) return;
-        
+
+        const vaccineList = db.vaccineCustom || [];
+        const reminders = VaccineSchedule.getReminders(vaccineList);
+
         if (reminders.length === 0) {
-            card.style.display = 'none';
-            return;
-        }
-        
-        card.style.display = 'block';
-        list.innerHTML = reminders.map(v => `
-            <div class="dash-vaccine-item">
-                <span class="dash-vaccine-dot" style="background:#E85D75"></span>
-                <div class="dash-vaccine-text">
-                    <strong>${v.name}</strong> 第${v.dose}剂
-                    <span class="dash-push-tag">${v.desc}</span>
+            card.style.display = 'block';
+            list.innerHTML = `
+                <div style="text-align:center;padding:12px 0;color:#999;font-size:13px">
+                    还没有添加疫苗计划<br>
+                    <span style="font-size:12px">点击下方按钮自定义宝宝的接种计划</span>
                 </div>
+            `;
+        } else {
+            card.style.display = 'block';
+            list.innerHTML = reminders.map(v => {
+                let tagText = '', tagColor = '';
+                if (v.diffDays < 0) {
+                    tagText = `已过期${Math.abs(v.diffDays)}天`;
+                    tagColor = '#E85D75';
+                } else if (v.diffDays === 0) {
+                    tagText = '今天';
+                    tagColor = '#F0AD4E';
+                } else if (v.diffDays <= 7) {
+                    tagText = `还剩${v.diffDays}天`;
+                    tagColor = '#5CB85C';
+                } else {
+                    tagText = `${v.diffDays}天后`;
+                    tagColor = '#5B9BD5';
+                }
+                return `
+                <div class="dash-vaccine-item">
+                    <span class="dash-vaccine-dot" style="background:${tagColor}"></span>
+                    <div class="dash-vaccine-text">
+                        <strong>${this.escape(v.name)}</strong>
+                        <span class="dash-push-tag" style="background:${tagColor}20;color:${tagColor}">${tagText}</span>
+                        ${v.note ? '<div style="font-size:11px;color:#999;margin-top:2px">' + this.escape(v.note) + '</div>' : ''}
+                        <div style="font-size:11px;color:#aaa">计划: ${v.planDate}</div>
+                    </div>
+                    <button style="font-size:11px;padding:2px 8px;border-radius:10px;border:1px solid #5CB85C;color:#5CB85C;background:#fff;cursor:pointer;flex-shrink:0" onclick="App.completeVaccine('${v.id}')">✓</button>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // 添加管理按钮
+        const existingBtn = card.querySelector('.dash-vaccine-manage');
+        if (!existingBtn) {
+            const manageBtn = document.createElement('div');
+            manageBtn.className = 'dash-vaccine-manage';
+            manageBtn.style.cssText = 'text-align:center;margin-top:8px';
+            manageBtn.innerHTML = '<button style="font-size:12px;padding:6px 16px;border-radius:14px;border:1px dashed var(--primary);color:var(--primary);background:transparent;cursor:pointer">+ 管理疫苗计划</button>';
+            manageBtn.querySelector('button').addEventListener('click', () => this.showVaccineManager());
+            card.appendChild(manageBtn);
+        }
+    },
+
+    completeVaccine(vaccineId) {
+        const db = Storage.load();
+        const list = db.vaccineCustom || [];
+        const idx = list.findIndex(v => v.id === vaccineId);
+        if (idx >= 0) {
+            list[idx].completed = true;
+            list[idx].completedDate = Utils.todayStr();
+            Storage.save(db);
+            this.renderVaccineReminder();
+        }
+    },
+
+    showVaccineManager() {
+        const db = Storage.load();
+        const list = db.vaccineCustom || [];
+        
+        const itemsHtml = list.length === 0 
+            ? '<div style="text-align:center;color:#999;padding:20px">还没有疫苗计划，点击下方添加</div>'
+            : list.sort((a,b) => {
+                if (a.completed && !b.completed) return 1;
+                if (!a.completed && b.completed) return -1;
+                return new Date(a.planDate) - new Date(b.planDate);
+            }).map(v => `
+                <div class="vaccine-mgr-item" style="display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--border);${v.completed ? 'opacity:0.5' : ''}">
+                    <span style="font-size:18px">${v.completed ? '✅' : '💉'}</span>
+                    <div style="flex:1;min-width:0">
+                        <div style="font-weight:600;font-size:14px">${this.escape(v.name)}</div>
+                        <div style="font-size:11px;color:#999">计划: ${v.planDate}${v.note ? ' · ' + this.escape(v.note) : ''}${v.completedDate ? ' · 已完成: ' + v.completedDate : ''}</div>
+                    </div>
+                    <button style="font-size:16px;padding:2px 6px;border:none;background:none;cursor:pointer" onclick="App.deleteVaccineItem('${v.id}')">🗑</button>
+                </div>
+            `).join('');
+
+        this.showModal('💉 疫苗管理', `
+            <div class="form-group">
+                <p style="font-size:11px;color:#999;margin-bottom:8px">自定义宝宝的疫苗计划，已接种的会自动归档</p>
+                <div style="max-height:300px;overflow-y:auto;margin-bottom:12px">${itemsHtml}</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <input id="vaccineNameInput" placeholder="疫苗名称" style="flex:1;min-width:100px;padding:8px 12px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit">
+                    <input id="vaccineDateInput" type="date" value="${Utils.todayStr()}" style="width:130px;padding:8px 12px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit">
+                </div>
+                <input id="vaccineNoteInput" placeholder="备注（如：自费、五联等）" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;margin-top:8px">
+                <button class="btn btn-primary" style="margin-top:10px;width:100%" onclick="App.addVaccineItem()">+ 添加疫苗</button>
             </div>
-        `).join('');
+        `, () => {});
+    },
+
+    addVaccineItem() {
+        const nameInput = document.getElementById('vaccineNameInput');
+        const dateInput = document.getElementById('vaccineDateInput');
+        const noteInput = document.getElementById('vaccineNoteInput');
+        const name = nameInput ? nameInput.value.trim() : '';
+        const date = dateInput ? dateInput.value : '';
+        const note = noteInput ? noteInput.value.trim() : '';
+        
+        if (!name) { alert('请输入疫苗名称'); return; }
+        if (!date) { alert('请选择计划日期'); return; }
+
+        const db = Storage.load();
+        if (!db.vaccineCustom) db.vaccineCustom = [];
+        db.vaccineCustom.push({
+            id: Date.now().toString(),
+            name, planDate: date, note, completed: false, completedDate: null
+        });
+        Storage.save(db);
+        this.closeModal();
+        this.renderVaccineReminder();
+        this.showVaccineManager(); // 重新打开管理界面
+    },
+
+    deleteVaccineItem(vaccineId) {
+        if (!confirm('确定删除这条疫苗计划吗？')) return;
+        const db = Storage.load();
+        if (!db.vaccineCustom) return;
+        db.vaccineCustom = db.vaccineCustom.filter(v => v.id !== vaccineId);
+        Storage.save(db);
+        this.closeModal();
+        this.renderVaccineReminder();
+        this.showVaccineManager();
     },
 
     renderTimeline() {
@@ -4317,9 +4466,9 @@ const App = {
     },
 
     switchGrowthTab(tab) {
-        document.querySelectorAll('.growth-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.growth-nav-btn').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.growth-section').forEach(c => c.classList.remove('active'));
-        const tabBtn = document.querySelector(`.growth-tab[data-gtab="${tab}"]`);
+        const tabBtn = document.querySelector(`.growth-nav-btn[data-gtab="${tab}"]`);
         if (tabBtn) tabBtn.classList.add('active');
         const content = document.getElementById(`gtab-${tab}`);
         if (content) content.classList.add('active');
@@ -4400,14 +4549,35 @@ const App = {
             return;
         }
 
+        // 计算 WHO 标准范围
+        const db = Storage.load();
+        const gender = db.baby.gender || 'girl';
+        const birthDate = db.baby.birthDate;
+        const whoData = (typeof WhoGrowth !== 'undefined') ? (WhoGrowth[gender] || WhoGrowth.girl) : null;
+        let ageMonths = null, hRange = '', wRange = '';
+        if (birthDate && latest.date) {
+            ageMonths = parseFloat(((new Date(latest.date) - new Date(birthDate)) / (1000*60*60*24*30.44)).toFixed(1));
+            if (whoData && ageMonths >= 0) {
+                const closestMonth = Object.keys(whoData).map(Number).sort((a,b)=>a-b)
+                    .reduce((prev, curr) => Math.abs(curr - ageMonths) < Math.abs(prev - ageMonths) ? curr : prev);
+                const std = whoData[closestMonth];
+                if (std) {
+                    if (latest.height && std.height) hRange = `标准 P3-P97: ${std.height.p3}-${std.height.p97}cm`;
+                    if (latest.weight && std.weight) wRange = `标准 P3-P97: ${std.weight.p3}-${std.weight.p97}kg`;
+                }
+            }
+        }
+
         container.innerHTML = `
             <div class="growth-stat-card">
                 <div class="growth-stat-label">身高</div>
                 <div class="growth-stat-value">${latest.height || '-'}<span class="growth-stat-unit">cm</span></div>
+                ${hRange ? '<div class="growth-stat-range">' + this.escape(hRange) + '</div>' : ''}
             </div>
             <div class="growth-stat-card">
                 <div class="growth-stat-label">体重</div>
                 <div class="growth-stat-value">${latest.weight || '-'}<span class="growth-stat-unit">kg</span></div>
+                ${wRange ? '<div class="growth-stat-range">' + this.escape(wRange) + '</div>' : ''}
             </div>
             <div class="growth-stat-card">
                 <div class="growth-stat-label">头围</div>
@@ -4627,14 +4797,40 @@ const App = {
             container.innerHTML = '<div class="empty-state">暂无记录</div>';
             return;
         }
-        container.innerHTML = records.map(r => `
+
+        const db = Storage.load();
+        const gender = db.baby.gender || 'girl';
+        const birthDate = db.baby.birthDate;
+        const whoData = (typeof WhoGrowth !== 'undefined') ? (WhoGrowth[gender] || WhoGrowth.girl) : null;
+
+        container.innerHTML = records.map(r => {
+            // 计算该条记录对应的月龄
+            const ageMonths = birthDate ? parseFloat(((new Date(r.date) - new Date(birthDate)) / (1000*60*60*24*30.44)).toFixed(1)) : null;
+
+            // 获取 WHO 标准范围
+            let heightRange = '', weightRange = '';
+            if (whoData && ageMonths !== null && ageMonths >= 0) {
+                const closestMonth = Object.keys(whoData).map(Number).sort((a,b)=>a-b)
+                    .reduce((prev, curr) => Math.abs(curr - ageMonths) < Math.abs(prev - ageMonths) ? curr : prev);
+                const std = whoData[closestMonth];
+                if (std) {
+                    if (r.height && std.height) {
+                        heightRange = ` (标准 P3-P97: ${std.height.p3}-${std.height.p97}cm)`;
+                    }
+                    if (r.weight && std.weight) {
+                        weightRange = ` (标准 P3-P97: ${std.weight.p3}-${std.weight.p97}kg)`;
+                    }
+                }
+            }
+
+            return `
             <div class="record-card">
                 <div class="record-card-header">
-                    <div class="record-title">${Utils.formatDateFull(r.date)}</div>
+                    <div class="record-title">${Utils.formatDateFull(r.date)}${ageMonths !== null && ageMonths >= 0 ? ' · ' + ageMonths + '月龄' : ''}</div>
                 </div>
                 <div class="record-detail">
-                    ${r.height ? '<strong>身高：</strong>' + r.height + 'cm<br>' : ''}
-                    ${r.weight ? '<strong>体重：</strong>' + r.weight + 'kg<br>' : ''}
+                    ${r.height ? '<strong>身高：</strong>' + r.height + 'cm <span style="color:#999;font-size:11px">' + this.escape(heightRange) + '</span><br>' : ''}
+                    ${r.weight ? '<strong>体重：</strong>' + r.weight + 'kg <span style="color:#999;font-size:11px">' + this.escape(weightRange) + '</span><br>' : ''}
                     ${r.headCircumference ? '<strong>头围：</strong>' + r.headCircumference + 'cm<br>' : ''}
                     ${r.note ? '<strong>备注：</strong>' + this.escape(r.note) : ''}
                 </div>
@@ -4643,7 +4839,7 @@ const App = {
                     <button class="record-delete" onclick="App.deleteRecord('growth','${r.id}')">🗑</button>
                 </div>
             </div>
-        `).join('');
+        `}).join('');
     },
 
     renderMilestone() {
