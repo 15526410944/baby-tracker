@@ -4917,7 +4917,7 @@ const App = {
                 <div class="diary-content">${this.escape(r.content || '')}</div>
                 ${r.images && r.images.length > 0 ? `
                     <div class="diary-images" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px">
-                        ${r.images.map(img => `<div class="diary-image" style="aspect-ratio:1;border-radius:8px;overflow:hidden;cursor:pointer" onclick="App.viewDiaryImage('${img.replace(/'/g, "\\'")}')}"><img src="${img}" style="width:100%;height:100%;object-fit:cover"></div>`).join('')}
+                        ${r.images.map((img, idx) => `<div class="diary-image" data-diary-id="${r.id}" data-img-index="${idx}" style="aspect-ratio:1;border-radius:8px;overflow:hidden;cursor:pointer"><img src="${img}" style="width:100%;height:100%;object-fit:cover"></div>`).join('')}
                     </div>
                 ` : ''}
                 <div class="record-actions">
@@ -4926,6 +4926,19 @@ const App = {
                 </div>
             </div>
         `).join('');
+
+        // 绑定图片点击事件
+        document.querySelectorAll('.diary-image').forEach(el => {
+            el.addEventListener('click', (e) => {
+                const diaryId = el.dataset.diaryId;
+                const imgIdx = parseInt(el.dataset.imgIndex);
+                const db = Storage.load();
+                const diary = (db.diary || []).find(d => d.id === diaryId);
+                if (diary && diary.images && diary.images[imgIdx]) {
+                    this.viewDiaryImage(diary.images[imgIdx]);
+                }
+            });
+        });
     },
 
     // ===== 删除记录 =====
