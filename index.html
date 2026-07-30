@@ -3072,19 +3072,33 @@ const App = {
             fileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
-                if (file.size > 2 * 1024 * 1024) {
-                    this.toast('图片不能超过2MB哦');
+                if (file.size > 5 * 1024 * 1024) {
+                    this.toast('图片不能超过5MB哦');
                     return;
                 }
-                const reader = new FileReader();
-                reader.onload = (ev) => {
+                // 压缩头像
+                const img = new Image();
+                const url = URL.createObjectURL(file);
+                img.onload = () => {
+                    URL.revokeObjectURL(url);
+                    const canvas = document.createElement('canvas');
+                    const size = 200;
+                    canvas.width = size;
+                    canvas.height = size;
+                    const ctx = canvas.getContext('2d');
+                    // 裁剪为正方形
+                    const minSide = Math.min(img.width, img.height);
+                    const sx = (img.width - minSide) / 2;
+                    const sy = (img.height - minSide) / 2;
+                    ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+                    const compressed = canvas.toDataURL('image/jpeg', 0.6);
                     const db = Storage.load();
-                    db.baby.avatar = ev.target.result;
+                    db.baby.avatar = compressed;
                     Storage.save(db);
                     this.renderBabyInfo();
                     this.toast('头像更新成功');
                 };
-                reader.readAsDataURL(file);
+                img.src = url;
             });
         }
 
